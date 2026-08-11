@@ -138,7 +138,7 @@ async function performLookup(upc) {
     const own = await lookupOwnProduct(upc);
 
     if (own.outcome === 'error') {
-        setStatus('Lookup failed — check your connection.');
+        setStatus("Couldn't check saved prices.");
         retryLookupBtn.classList.remove('hidden');
         return;
     }
@@ -154,7 +154,7 @@ async function performLookup(upc) {
     const off = await lookupOpenFoodFacts(upc);
 
     if (off.outcome === 'error') {
-        setStatus('Lookup failed — check your connection.');
+        setStatus("Couldn't reach Open Food Facts.");
         retryLookupBtn.classList.remove('hidden');
         return;
     }
