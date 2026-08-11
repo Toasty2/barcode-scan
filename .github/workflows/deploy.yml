@@ -1,0 +1,47 @@
+name: Deploy to Siteground
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SITEGROUND_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p 18765 gnldm1087.siteground.biz >> ~/.ssh/known_hosts
+
+      - name: Sync application code to server
+        run: |
+          rsync -avz --delete \
+            -e "ssh -i ~/.ssh/deploy_key -p 18765" \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='.env' \
+            --exclude='vendor' \
+            --exclude='storage' \
+            --exclude='bootstrap/cache' \
+            ./ u2480-k11xm8d29elx@gnldm1087.siteground.biz:~/www/roywenman.co.uk/apps/barcode-scan/
+
+      - name: Install dependencies, migrate, and publish public assets on server
+        run: |
+          ssh -i ~/.ssh/deploy_key -p 18765 u2480-k11xm8d29elx@gnldm1087.siteground.biz \
+            "bash ~/www/roywenman.co.uk/apps/barcode-scan/deploy/remote-deploy.sh"
