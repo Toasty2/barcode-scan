@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Scan a barcode</title>
     @vite(['resources/css/app.css', 'resources/js/scanner.js'])
 </head>
@@ -20,13 +21,43 @@
         Start scan
     </button>
 
-    <div id="result" class="text-center space-y-2" hidden>
-        <p>Detected: <strong id="result-value"></strong> (<span id="result-format"></span>)</p>
-        <p id="product-name" class="text-gray-300"></p>
-        <button id="scan-again-btn" type="button" class="w-full py-3 rounded-lg bg-gray-700 font-medium">
-            Scan again
+    <form id="entry-form" class="space-y-3 hidden">
+        <div>
+            <label for="entry-name" class="block text-sm mb-1">Product name</label>
+            <input id="entry-name" type="text" class="w-full p-2 rounded bg-gray-800 border border-gray-700" required>
+        </div>
+        <div class="flex gap-3">
+            <div class="flex-1">
+                <label for="entry-price" class="block text-sm mb-1">Price (£)</label>
+                <input id="entry-price" type="text" inputmode="decimal" class="w-full p-2 rounded bg-gray-800 border border-gray-700" required>
+            </div>
+            <div class="w-20">
+                <label for="entry-quantity" class="block text-sm mb-1">Qty</label>
+                <input id="entry-quantity" type="number" min="1" value="1" class="w-full p-2 rounded bg-gray-800 border border-gray-700" required>
+            </div>
+        </div>
+        <p id="entry-stale-warning" class="text-amber-400 text-sm hidden">
+            This price hasn't been confirmed in a while — please double check it.
+        </p>
+        <button id="add-item-btn" type="button" class="w-full py-3 rounded-lg bg-green-700 font-medium">
+            Add to trip
         </button>
+    </form>
+
+    <button id="add-coupon-btn" type="button" class="w-full py-2 rounded-lg bg-gray-700 text-sm font-medium">
+        Add coupon
+    </button>
+
+    <div>
+        <h2 class="text-sm font-semibold text-gray-300 mb-2">This trip (<span id="trip-count">0</span> items)</h2>
+        <div id="trip-list" class="space-y-2 max-h-96 overflow-y-auto"></div>
     </div>
+
+    <button id="submit-trip-btn" type="button" class="w-full py-3 rounded-lg bg-blue-700 disabled:bg-gray-600 font-medium" disabled>
+        Submit trip
+    </button>
+
+    <p id="submit-status" class="text-center text-sm"></p>
 </main>
 </body>
 </html>
