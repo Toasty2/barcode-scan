@@ -7,6 +7,7 @@ const scanAgainBtn = document.getElementById('scan-again-btn');
 const resultEl = document.getElementById('result');
 const resultValue = document.getElementById('result-value');
 const resultFormat = document.getElementById('result-format');
+const productName = document.getElementById('product-name');
 
 let detector = null;
 let stream = null;
@@ -79,12 +80,30 @@ async function scanFrame() {
     requestAnimationFrame(scanFrame);
 }
 
-function onDetected(barcode) {
+async function lookupProductName(barcode) {
+    const url = `https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(barcode)}.json?fields=product_name`;
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) return null;
+
+        const data = await response.json();
+        return data.status === 1 ? (data.product?.product_name ?? null) : null;
+    } catch {
+        return null;
+    }
+}
+
+async function onDetected(barcode) {
     stopScan();
     setStatus('');
     resultValue.textContent = barcode.rawValue;
     resultFormat.textContent = barcode.format;
     resultEl.hidden = false;
+
+    productName.textContent = 'Looking up product name…';
+    const name = await lookupProductName(barcode.rawValue);
+    productName.textContent = name ?? 'Product name not found';
 }
 
 startBtn.addEventListener('click', startScan);

@@ -22,6 +22,7 @@
 
     <div id="result" class="text-center space-y-2" hidden>
         <p>Detected: <strong id="result-value"></strong> (<span id="result-format"></span>)</p>
+        <p id="product-name" class="text-gray-300"></p>
         <button id="scan-again-btn" type="button" class="w-full py-3 rounded-lg bg-gray-700 font-medium">
             Scan again
         </button>
