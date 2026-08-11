@@ -21,6 +21,10 @@
         Start scan
     </button>
 
+    <button id="retry-lookup-btn" type="button" class="w-full py-2 rounded-lg bg-amber-700 text-sm font-medium hidden">
+        Retry lookup
+    </button>
+
     <form id="entry-form" class="space-y-3 hidden">
         <div>
             <label for="entry-name" class="block text-sm mb-1">Product name</label>

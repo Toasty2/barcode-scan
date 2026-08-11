@@ -4,6 +4,7 @@ const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').content;
 const preview = document.getElementById('preview');
 const status = document.getElementById('status');
 const startBtn = document.getElementById('start-btn');
+const retryLookupBtn = document.getElementById('retry-lookup-btn');
 
 const entryForm = document.getElementById('entry-form');
 const entryName = document.getElementById('entry-name');
@@ -50,6 +51,7 @@ async function init() {
 
 async function startScan() {
     entryForm.classList.add('hidden');
+    retryLookupBtn.classList.add('hidden');
     setStatus('Requesting camera…');
 
     try {
@@ -93,14 +95,22 @@ async function scanFrame() {
 }
 
 // --- Lookup ----------------------------------------------------------------
+//
+// Each lookup resolves to one of three outcomes, kept distinct throughout so
+// the UI can tell "confirmed not found" apart from "the request itself
+// failed" (network blip, timeout, rate limiting)
 
 async function lookupOwnProduct(upc) {
     try {
         const response = await fetch(`/products/${encodeURIComponent(upc)}`);
-        if (!response.ok) return { found: false };
-        return await response.json();
+        if (!response.ok) return { outcome: 'error' };
+
+        const data = await response.json();
+        return data.found
+            ? { outcome: 'found', productName: data.product_name, price: data.price, stale: data.stale }
+            : { outcome: 'not_found' };
     } catch {
-        return { found: false };
+        return { outcome: 'error' };
     }
 }
 
@@ -109,16 +119,55 @@ async function lookupOpenFoodFacts(upc) {
 
     try {
         const response = await fetch(url);
-        if (!response.ok) return null;
+        if (!response.ok) return { outcome: 'error' };
 
         const data = await response.json();
-        return data.status === 1 ? (data.product?.product_name ?? null) : null;
+        return data.status === 1 && data.product?.product_name
+            ? { outcome: 'found', productName: data.product.product_name }
+            : { outcome: 'not_found' };
     } catch {
-        return null;
+        return { outcome: 'error' };
     }
 }
 
-async function onDetected(barcode) {
+async function performLookup(upc) {
+    retryLookupBtn.classList.add('hidden');
+    setStatus('Looking up product…');
+
+    const own = await lookupOwnProduct(upc);
+
+    if (own.outcome === 'error') {
+        setStatus('Lookup failed — check your connection.');
+        retryLookupBtn.classList.remove('hidden');
+        return;
+    }
+
+    if (own.outcome === 'found') {
+        entryName.value = own.productName;
+        entryPrice.value = own.price;
+        entryStaleWarning.classList.toggle('hidden', !own.stale);
+        setStatus('Found cached price — check and add.');
+        return;
+    }
+
+    const off = await lookupOpenFoodFacts(upc);
+
+    if (off.outcome === 'error') {
+        setStatus('Lookup failed — check your connection.');
+        retryLookupBtn.classList.remove('hidden');
+        return;
+    }
+
+    if (off.outcome === 'found') {
+        entryName.value = off.productName;
+        setStatus('New product — enter the price.');
+        return;
+    }
+
+    setStatus('Product not found in Open Food Facts — enter it manually.');
+}
+
+function onDetected(barcode) {
     stopScan();
     pendingUpc = barcode.rawValue;
 
@@ -127,21 +176,8 @@ async function onDetected(barcode) {
     entryQuantity.value = '1';
     entryStaleWarning.classList.add('hidden');
     entryForm.classList.remove('hidden');
-    setStatus('Looking up product…');
 
-    const own = await lookupOwnProduct(pendingUpc);
-
-    if (own.found) {
-        entryName.value = own.product_name;
-        entryPrice.value = own.price;
-        entryStaleWarning.classList.toggle('hidden', !own.stale);
-        setStatus('Found cached price — check and add.');
-        return;
-    }
-
-    const offName = await lookupOpenFoodFacts(pendingUpc);
-    entryName.value = offName ?? '';
-    setStatus(offName ? 'New product — enter the price.' : 'Product name not found — enter it manually.');
+    performLookup(pendingUpc);
 }
 
 // --- Trip list ---------------------------------------------------------------
@@ -192,6 +228,7 @@ function addItemToTrip() {
     updateTripCount();
 
     entryForm.classList.add('hidden');
+    retryLookupBtn.classList.add('hidden');
     pendingUpc = null;
     setStatus('Added. Tap "Start scan" for the next item.');
 }
@@ -253,6 +290,9 @@ async function submitTrip() {
 }
 
 startBtn.addEventListener('click', startScan);
+retryLookupBtn.addEventListener('click', () => {
+    if (pendingUpc) performLookup(pendingUpc);
+});
 addItemBtn.addEventListener('click', addItemToTrip);
 addCouponBtn.addEventListener('click', addCoupon);
 submitTripBtn.addEventListener('click', submitTrip);
