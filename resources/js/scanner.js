@@ -1,5 +1,6 @@
 const BARCODE_FORMATS = ['ean_13', 'ean_8', 'upc_a', 'upc_e'];
 const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').content;
+const APP_BASE_URL = document.querySelector('meta[name="app-base-url"]').content;
 
 const preview = document.getElementById('preview');
 const status = document.getElementById('status');
@@ -102,7 +103,7 @@ async function scanFrame() {
 
 async function lookupOwnProduct(upc) {
     try {
-        const response = await fetch(`/products/${encodeURIComponent(upc)}`);
+        const response = await fetch(`${APP_BASE_URL}/products/${encodeURIComponent(upc)}`);
         if (!response.ok) return { outcome: 'error' };
 
         const data = await response.json();
@@ -265,7 +266,7 @@ async function submitTrip() {
     submitStatus.textContent = 'Saving trip…';
 
     try {
-        const response = await fetch('/trips', {
+        const response = await fetch(`${APP_BASE_URL}/trips`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
