@@ -18,7 +18,13 @@ class BudgetChangeResource extends Resource
 {
     protected static ?string $model = BudgetChange::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalculator;
+
+    protected static ?string $modelLabel = 'Budget';
+
+    protected static ?string $pluralModelLabel = 'Budget';
+
+    protected static ?string $slug = 'budget';
 
     public static function form(Schema $schema): Schema
     {
