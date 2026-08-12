@@ -49,13 +49,14 @@
         </button>
     </form>
 
-    <button id="add-coupon-btn" type="button" class="w-full py-2 rounded-lg bg-gray-700 text-sm font-medium">
-        Add coupon
-    </button>
-
     <div>
         <h2 class="text-sm font-semibold text-gray-300 mb-2">This trip (<span id="trip-count">0</span> items)</h2>
         <div id="trip-list" class="space-y-2 max-h-96 overflow-y-auto"></div>
+    </div>
+
+    <div>
+        <label for="trip-discount" class="block text-sm mb-1">Coupons / discount for this trip (£)</label>
+        <input id="trip-discount" type="text" inputmode="decimal" placeholder="0.00" class="w-full p-2 rounded bg-gray-800 border border-gray-700">
     </div>
 
     <button id="submit-trip-btn" type="button" class="w-full py-3 rounded-lg bg-blue-700 disabled:bg-gray-600 font-medium" disabled>

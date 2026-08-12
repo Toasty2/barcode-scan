@@ -9,12 +9,14 @@ class Trip extends Model
 {
     protected $fillable = [
         'shopped_on',
+        'discount',
     ];
 
     protected function casts(): array
     {
         return [
             'shopped_on' => 'date',
+            'discount' => 'decimal:2',
         ];
     }
 

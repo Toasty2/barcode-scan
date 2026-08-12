@@ -13,10 +13,10 @@ const entryPrice = document.getElementById('entry-price');
 const entryQuantity = document.getElementById('entry-quantity');
 const entryStaleWarning = document.getElementById('entry-stale-warning');
 const addItemBtn = document.getElementById('add-item-btn');
-const addCouponBtn = document.getElementById('add-coupon-btn');
 
 const tripList = document.getElementById('trip-list');
 const tripCount = document.getElementById('trip-count');
+const tripDiscount = document.getElementById('trip-discount');
 const submitTripBtn = document.getElementById('submit-trip-btn');
 const submitStatus = document.getElementById('submit-status');
 
@@ -260,20 +260,6 @@ function addItemToTrip() {
     setStatus('Added. Tap "Start scan" for the next item.');
 }
 
-function addCoupon() {
-    const row = createTripRow({
-        upc: null,
-        entryType: 'coupon',
-        name: 'Coupons',
-        price: '',
-        quantity: '1',
-    });
-
-    tripList.prepend(row);
-    updateTripCount();
-    row.querySelector('.item-price').focus();
-}
-
 async function submitTrip() {
     const items = [...tripList.children].map((row) => ({
         upc: row.dataset.upc || null,
@@ -288,6 +274,8 @@ async function submitTrip() {
         return;
     }
 
+    const discount = parseFloat(tripDiscount.value) || 0;
+
     submitTripBtn.disabled = true;
     submitStatus.textContent = 'Saving trip…';
 
@@ -298,7 +286,7 @@ async function submitTrip() {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': CSRF_TOKEN,
             },
-            body: JSON.stringify({ items }),
+            body: JSON.stringify({ items, discount }),
         });
 
         const data = await response.json();
@@ -309,6 +297,7 @@ async function submitTrip() {
 
         tripList.innerHTML = '';
         updateTripCount();
+        tripDiscount.value = '';
         submitStatus.textContent = 'Trip saved!';
     } catch (err) {
         submitStatus.textContent = `Save failed: ${err.message}`;
@@ -321,7 +310,6 @@ retryLookupBtn.addEventListener('click', () => {
     if (pendingUpc) performLookup(pendingUpc);
 });
 addItemBtn.addEventListener('click', addItemToTrip);
-addCouponBtn.addEventListener('click', addCoupon);
 submitTripBtn.addEventListener('click', submitTrip);
 
 init();

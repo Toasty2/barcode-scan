@@ -13,19 +13,23 @@ class TripController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
+            'discount' => ['nullable', 'numeric', 'min:0'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.upc' => ['nullable', 'string', 'max:32'],
             'items.*.product_name' => ['required', 'string', 'max:255'],
             'items.*.price' => ['required', 'numeric'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
-            'items.*.entry_type' => ['required', 'in:scan,coupon'],
+            'items.*.entry_type' => ['required', 'in:scan'],
         ]);
 
         $trip = DB::transaction(function () use ($validated) {
-            $trip = Trip::create(['shopped_on' => now()->toDateString()]);
+            $trip = Trip::create([
+                'shopped_on' => now()->toDateString(),
+                'discount' => $validated['discount'] ?? 0,
+            ]);
 
             foreach ($validated['items'] as $item) {
-                if ($item['entry_type'] === 'scan' && ! empty($item['upc'])) {
+                if (! empty($item['upc'])) {
                     Product::updateOrCreate(
                         ['upc' => $item['upc']],
                         [
