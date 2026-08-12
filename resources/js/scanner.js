@@ -97,38 +97,64 @@ async function scanFrame() {
 
 // --- Lookup ----------------------------------------------------------------
 //
-// Each lookup resolves to one of three outcomes, kept distinct throughout so
-// the UI can tell "confirmed not found" apart from "the request itself
-// failed" (network blip, timeout, rate limiting)
+// Each lookup resolves to a "found"/"not_found" outcome or one of three
+// distinct failure outcomes, so the UI can report specifically what went
+// wrong rather than a single generic failure message:
+//   - network_error: fetch() itself failed (offline, DNS, connection refused)
+//   - http_error: a response came back but with a non-2xx status
+//   - parse_error: a 2xx response whose body wasn't valid JSON
+
+async function fetchJson(url, options) {
+    let response;
+    try {
+        response = await fetch(url, options);
+    } catch {
+        return { outcome: 'network_error' };
+    }
+
+    if (!response.ok) {
+        return { outcome: 'http_error', status: response.status };
+    }
+
+    try {
+        return { outcome: 'ok', data: await response.json() };
+    } catch {
+        return { outcome: 'parse_error' };
+    }
+}
 
 async function lookupOwnProduct(upc) {
-    try {
-        const response = await fetch(`${APP_BASE_URL}/products/${encodeURIComponent(upc)}`);
-        if (!response.ok) return { outcome: 'error' };
+    const result = await fetchJson(`${APP_BASE_URL}/products/${encodeURIComponent(upc)}`);
+    if (result.outcome !== 'ok') return result;
 
-        const data = await response.json();
-        return data.found
-            ? { outcome: 'found', productName: data.product_name, price: data.price, stale: data.stale }
-            : { outcome: 'not_found' };
-    } catch {
-        return { outcome: 'error' };
-    }
+    return result.data.found
+        ? {
+              outcome: 'found',
+              productName: result.data.product_name,
+              price: result.data.price,
+              stale: result.data.stale,
+          }
+        : { outcome: 'not_found' };
 }
 
 async function lookupOpenFoodFacts(upc) {
     const url = `https://world.openfoodfacts.org/api/v2/product/${encodeURIComponent(upc)}.json?fields=product_name`;
+    const result = await fetchJson(url);
+    if (result.outcome !== 'ok') return result;
 
-    try {
-        const response = await fetch(url);
-        if (!response.ok) return { outcome: 'error' };
+    return result.data.status === 1 && result.data.product?.product_name
+        ? { outcome: 'found', productName: result.data.product.product_name }
+        : { outcome: 'not_found' };
+}
 
-        const data = await response.json();
-        return data.status === 1 && data.product?.product_name
-            ? { outcome: 'found', productName: data.product.product_name }
-            : { outcome: 'not_found' };
-    } catch {
-        return { outcome: 'error' };
+function describeLookupFailure(result, sourceLabel) {
+    if (result.outcome === 'network_error') {
+        return `Couldn't reach ${sourceLabel} — check your connection.`;
     }
+    if (result.outcome === 'http_error') {
+        return `${sourceLabel} returned an error (status ${result.status}).`;
+    }
+    return `${sourceLabel} returned an unexpected response.`;
 }
 
 async function performLookup(upc) {
@@ -136,12 +162,6 @@ async function performLookup(upc) {
     setStatus('Looking up product…');
 
     const own = await lookupOwnProduct(upc);
-
-    if (own.outcome === 'error') {
-        setStatus("Couldn't check saved prices.");
-        retryLookupBtn.classList.remove('hidden');
-        return;
-    }
 
     if (own.outcome === 'found') {
         entryName.value = own.productName;
@@ -151,17 +171,23 @@ async function performLookup(upc) {
         return;
     }
 
-    const off = await lookupOpenFoodFacts(upc);
-
-    if (off.outcome === 'error') {
-        setStatus("Couldn't reach Open Food Facts.");
+    if (own.outcome !== 'not_found') {
+        setStatus(describeLookupFailure(own, 'saved prices'));
         retryLookupBtn.classList.remove('hidden');
         return;
     }
 
+    const off = await lookupOpenFoodFacts(upc);
+
     if (off.outcome === 'found') {
         entryName.value = off.productName;
         setStatus('New product — enter the price.');
+        return;
+    }
+
+    if (off.outcome !== 'not_found') {
+        setStatus(describeLookupFailure(off, 'Open Food Facts'));
+        retryLookupBtn.classList.remove('hidden');
         return;
     }
 
