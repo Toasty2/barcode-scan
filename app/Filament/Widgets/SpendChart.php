@@ -9,6 +9,8 @@ use Illuminate\Support\Collection;
 
 class SpendChart extends ChartWidget
 {
+    protected static ?int $sort = 2;
+
     protected ?string $heading = 'Spend';
 
     public ?string $filter = '3m';
