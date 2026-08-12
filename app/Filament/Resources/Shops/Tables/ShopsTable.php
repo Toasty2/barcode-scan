@@ -1,32 +1,27 @@
 <?php
 
-namespace App\Filament\Resources\Products\Tables;
+namespace App\Filament\Resources\Shops\Tables;
 
-use App\Filament\Support\PriceColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Support\Enums\FontWeight;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class ProductsTable
+class ShopsTable
 {
     public static function configure(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('product_name')
+                TextColumn::make('name')
                     ->searchable()
-                    ->weight(FontWeight::Medium),
-                PriceColumn::make('price')
-                    ->sortable(),
-                TextColumn::make('last_confirmed')
-                    ->label('Last confirmed')
-                    ->dateTime('d/m/Y')
-                    ->sortable()
                     ->badge()
-                    ->color(fn ($record) => $record->last_confirmed->lt(now()->subDays(90)) ? 'warning' : 'success'),
+                    ->color(fn ($record) => $record->badgeColor()),
+                IconColumn::make('is_default')
+                    ->label('Default')
+                    ->boolean(),
             ])
             ->filters([
                 //

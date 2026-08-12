@@ -14,6 +14,7 @@ class TripController extends Controller
     {
         $validated = $request->validate([
             'discount' => ['nullable', 'integer', 'min:0'],
+            'shop_id' => ['nullable', 'integer', 'exists:shops,id'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.upc' => ['nullable', 'string', 'max:32'],
             'items.*.product_name' => ['required', 'string', 'max:255'],
@@ -25,6 +26,7 @@ class TripController extends Controller
         $trip = DB::transaction(function () use ($validated) {
             $trip = Trip::create([
                 'shopped_on' => now()->toDateString(),
+                'shop_id' => $validated['shop_id'] ?? null,
                 'discount' => $validated['discount'] ?? 0,
             ]);
 

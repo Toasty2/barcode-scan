@@ -48,8 +48,6 @@ class PurchasesRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('product_name')
             ->columns([
-                TextColumn::make('upc')
-                    ->label('UPC'),
                 TextColumn::make('product_name'),
                 TextColumn::make('entry_type')
                     ->label('Type')

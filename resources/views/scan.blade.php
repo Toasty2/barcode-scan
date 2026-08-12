@@ -55,6 +55,16 @@
     </div>
 
     <div>
+        <label for="trip-shop" class="block text-sm mb-1">Shop</label>
+        <select id="trip-shop" class="w-full p-2 rounded bg-gray-800 border border-gray-700">
+            <option value="">None</option>
+            @foreach ($shops as $shop)
+                <option value="{{ $shop->id }}" @selected($shop->is_default)>{{ $shop->name }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <div>
         <label for="trip-discount" class="block text-sm mb-1">Coupons / discount for this trip (£)</label>
         <input id="trip-discount" type="text" inputmode="decimal" placeholder="0.00" class="w-full p-2 rounded bg-gray-800 border border-gray-700">
     </div>

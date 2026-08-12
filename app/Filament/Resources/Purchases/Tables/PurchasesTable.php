@@ -19,9 +19,6 @@ class PurchasesTable
                     ->label('Trip date')
                     ->date('d/m/Y')
                     ->sortable(),
-                TextColumn::make('upc')
-                    ->label('UPC')
-                    ->searchable(),
                 TextColumn::make('product_name')
                     ->searchable(),
                 TextColumn::make('entry_type')

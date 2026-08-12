@@ -4,11 +4,14 @@ namespace Tests\Feature\Filament;
 
 use App\Filament\Resources\Products\Pages\CreateProduct;
 use App\Filament\Resources\Products\Pages\ListProducts;
+use App\Filament\Resources\Shops\Pages\CreateShop;
+use App\Filament\Resources\Shops\Pages\ListShops;
 use App\Filament\Resources\Trips\Pages\EditTrip;
 use App\Filament\Resources\Trips\Pages\ListTrips;
 use App\Filament\Resources\Trips\RelationManagers\PurchasesRelationManager;
 use App\Filament\Resources\Purchases\Pages\ListPurchases;
 use App\Models\Product;
+use App\Models\Shop;
 use App\Models\Trip;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -109,6 +112,35 @@ class ResourcesTest extends TestCase
         ])
             ->assertSuccessful()
             ->assertCanSeeTableRecords([$purchase]);
+    }
+
+    public function test_shops_list_shows_records(): void
+    {
+        $shop = Shop::create(['name' => 'Tesco', 'is_default' => true]);
+
+        $this->actingAs($this->user);
+
+        Livewire::test(ListShops::class)
+            ->assertSuccessful()
+            ->assertCanSeeTableRecords([$shop]);
+    }
+
+    public function test_a_shop_can_be_created(): void
+    {
+        $this->actingAs($this->user);
+
+        Livewire::test(CreateShop::class)
+            ->fillForm([
+                'name' => 'Waitrose',
+                'is_default' => false,
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas('shops', [
+            'name' => 'Waitrose',
+            'is_default' => false,
+        ]);
     }
 
     public function test_purchases_list_shows_records(): void

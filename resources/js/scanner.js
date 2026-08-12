@@ -18,6 +18,7 @@ const addItemBtn = document.getElementById('add-item-btn');
 
 const tripList = document.getElementById('trip-list');
 const tripCount = document.getElementById('trip-count');
+const tripShop = document.getElementById('trip-shop');
 const tripDiscount = document.getElementById('trip-discount');
 const submitTripBtn = document.getElementById('submit-trip-btn');
 const submitStatus = document.getElementById('submit-status');
@@ -277,6 +278,7 @@ async function submitTrip() {
     }
 
     const discount = toMinorUnits(tripDiscount.value, GBP) ?? 0;
+    const shopId = tripShop.value ? parseInt(tripShop.value, 10) : null;
 
     submitTripBtn.disabled = true;
     submitStatus.textContent = 'Saving trip…';
@@ -288,7 +290,7 @@ async function submitTrip() {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': CSRF_TOKEN,
             },
-            body: JSON.stringify({ items, discount }),
+            body: JSON.stringify({ items, discount, shop_id: shopId }),
         });
 
         const data = await response.json();

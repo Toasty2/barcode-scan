@@ -22,6 +22,11 @@ class TripsTable
                     ->sortable(),
                 TextColumn::make('purchases_count')
                     ->label('Items'),
+                TextColumn::make('shop.name')
+                    ->label('Shop')
+                    ->badge()
+                    ->color(fn ($record) => $record->shop?->badgeColor())
+                    ->placeholder('—'),
                 PriceColumn::make('discount')
                     ->sortable(),
                 TextColumn::make('created_at')

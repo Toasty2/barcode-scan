@@ -7,6 +7,7 @@ use App\Support\Money\Price;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
@@ -16,6 +17,7 @@ class Trip extends Model
 
     protected $fillable = [
         'shopped_on',
+        'shop_id',
         'discount',
     ];
 
@@ -30,6 +32,11 @@ class Trip extends Model
     public function purchases(): HasMany
     {
         return $this->hasMany(Purchase::class);
+    }
+
+    public function shop(): BelongsTo
+    {
+        return $this->belongsTo(Shop::class);
     }
 
     /**

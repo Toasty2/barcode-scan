@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\BudgetChange;
 use App\Models\Product;
+use App\Models\Shop;
 use App\Models\Trip;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -26,6 +27,12 @@ class DatabaseSeeder extends Seeder
 
         $products = Product::factory()->count(8)->create();
 
+        $shops = [
+            Shop::create(['name' => 'Tesco', 'colour' => '#00539F', 'is_default' => true]),
+            Shop::create(['name' => 'Waitrose', 'colour' => '#00603A', 'is_default' => false]),
+            null, // some trips have no shop set, to prove the dashboard handles that
+        ];
+
         // Two budget changes, so the dashboard has to prove it resolves the
         // right one per month rather than always using a single value.
         BudgetChange::create(['amount' => 20000, 'effective_from' => Carbon::now()->subMonths(2)->startOfMonth()]);
@@ -39,6 +46,7 @@ class DatabaseSeeder extends Seeder
 
                 $trip = Trip::create([
                     'shopped_on' => $shoppedOn,
+                    'shop_id' => fake()->randomElement($shops)?->id,
                     'discount' => fake()->boolean(25) ? fake()->numberBetween(50, 300) : 0,
                 ]);
 
