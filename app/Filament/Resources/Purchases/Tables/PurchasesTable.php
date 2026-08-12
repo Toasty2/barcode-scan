@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Purchases\Tables;
 
+use App\Filament\Support\PriceColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -29,13 +30,11 @@ class PurchasesTable
                 TextColumn::make('quantity')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('unit_price')
-                    ->money('GBP')
+                PriceColumn::make('unit_price')
                     ->sortable(),
-                TextColumn::make('line_total')
+                PriceColumn::make('line_total')
                     ->label('Line total')
-                    ->state(fn ($record) => $record->quantity * $record->unit_price)
-                    ->money('GBP'),
+                    ->state(fn ($record) => $record->unit_price->multiply($record->quantity)),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

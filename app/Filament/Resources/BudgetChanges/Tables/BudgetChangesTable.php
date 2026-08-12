@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\BudgetChanges\Tables;
 
+use App\Filament\Support\PriceColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -19,8 +20,7 @@ class BudgetChangesTable
                     ->label('Effective from')
                     ->date('F Y')
                     ->sortable(),
-                TextColumn::make('amount')
-                    ->money('GBP')
+                PriceColumn::make('amount')
                     ->sortable(),
             ])
             ->filters([

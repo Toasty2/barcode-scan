@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Trips\Tables;
 
+use App\Filament\Support\PriceColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -21,8 +22,7 @@ class TripsTable
                     ->sortable(),
                 TextColumn::make('purchases_count')
                     ->label('Items'),
-                TextColumn::make('discount')
-                    ->money('GBP')
+                PriceColumn::make('discount')
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Casts\PriceCast;
+use App\Support\Money\Price;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
 
@@ -15,7 +17,7 @@ class BudgetChange extends Model
     protected function casts(): array
     {
         return [
-            'amount' => 'decimal:2',
+            'amount' => PriceCast::class,
             'effective_from' => 'date',
         ];
     }
@@ -24,17 +26,19 @@ class BudgetChange extends Model
      * The budget amount in effect on the given date — the most recent
      * change whose effective_from is on or before it.
      */
-    public static function amountAsOf(CarbonInterface $date): ?string
+    public static function amountAsOf(CarbonInterface $date): ?Price
     {
-        return static::where('effective_from', '<=', $date)
+        $change = static::where('effective_from', '<=', $date)
             ->orderByDesc('effective_from')
-            ->value('amount');
+            ->first();
+
+        return $change?->amount;
     }
 
     /**
      * The budget amount in effect for the given calendar month.
      */
-    public static function amountForMonth(CarbonInterface $month): ?string
+    public static function amountForMonth(CarbonInterface $month): ?Price
     {
         return static::amountAsOf($month->clone()->startOfMonth());
     }

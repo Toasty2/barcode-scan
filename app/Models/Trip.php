@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Casts\PriceCast;
+use App\Support\Money\Price;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -21,7 +23,7 @@ class Trip extends Model
     {
         return [
             'shopped_on' => 'date',
-            'discount' => 'decimal:2',
+            'discount' => PriceCast::class,
         ];
     }
 
@@ -33,24 +35,27 @@ class Trip extends Model
     /**
      * Total spend across trips in the given date range, net of each trip's
      * discount — the line-item total minus discounts, not just the raw sum.
+     * Both sums happen as integer minor-unit arithmetic in SQL
      */
-    public static function netSpendForPeriod(CarbonInterface $start, CarbonInterface $end): float
+    public static function netSpendForPeriod(CarbonInterface $start, CarbonInterface $end): Price
     {
-        $grossSpend = (float) static::whereBetween('shopped_on', [$start, $end])
+        $grossMinorUnits = (int) static::whereBetween('shopped_on', [$start, $end])
             ->join('purchases', 'purchases.trip_id', '=', 'trips.id')
             ->sum(DB::raw('purchases.quantity * purchases.unit_price'));
 
-        $totalDiscount = (float) static::whereBetween('shopped_on', [$start, $end])->sum('discount');
+        $totalDiscountMinorUnits = (int) static::whereBetween('shopped_on', [$start, $end])->sum('discount');
 
-        return $grossSpend - $totalDiscount;
+        $currencyClass = config('money.default_currency');
+
+        return new Price($grossMinorUnits - $totalDiscountMinorUnits, new $currencyClass());
     }
 
-    public static function netSpendForMonth(CarbonInterface $month): float
+    public static function netSpendForMonth(CarbonInterface $month): Price
     {
         return static::netSpendForPeriod($month->clone()->startOfMonth(), $month->clone()->endOfMonth());
     }
 
-    public static function netSpendForYear(CarbonInterface $year): float
+    public static function netSpendForYear(CarbonInterface $year): Price
     {
         return static::netSpendForPeriod($year->clone()->startOfYear(), $year->clone()->endOfYear());
     }

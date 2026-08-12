@@ -28,8 +28,8 @@ class DatabaseSeeder extends Seeder
 
         // Two budget changes, so the dashboard has to prove it resolves the
         // right one per month rather than always using a single value.
-        BudgetChange::create(['amount' => 200, 'effective_from' => Carbon::now()->subMonths(2)->startOfMonth()]);
-        BudgetChange::create(['amount' => 250, 'effective_from' => Carbon::now()->startOfMonth()]);
+        BudgetChange::create(['amount' => 20000, 'effective_from' => Carbon::now()->subMonths(2)->startOfMonth()]);
+        BudgetChange::create(['amount' => 25000, 'effective_from' => Carbon::now()->startOfMonth()]);
 
         foreach ([2, 1, 0] as $monthsAgo) {
             $tripsThisMonth = $monthsAgo === 0 ? 2 : 3;
@@ -39,7 +39,7 @@ class DatabaseSeeder extends Seeder
 
                 $trip = Trip::create([
                     'shopped_on' => $shoppedOn,
-                    'discount' => fake()->boolean(25) ? fake()->randomFloat(2, 0.5, 3) : 0,
+                    'discount' => fake()->boolean(25) ? fake()->numberBetween(50, 300) : 0,
                 ]);
 
                 foreach ($products->random(fake()->numberBetween(4, 6)) as $product) {

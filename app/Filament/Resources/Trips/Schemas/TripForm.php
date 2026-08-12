@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\Trips\Schemas;
 
+use App\Filament\Support\PriceInput;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
 
 class TripForm
@@ -14,11 +14,9 @@ class TripForm
             ->components([
                 DatePicker::make('shopped_on')
                     ->required(),
-                TextInput::make('discount')
+                PriceInput::make('discount')
                     ->required()
-                    ->numeric()
-                    ->prefix('£')
-                    ->default(0.0),
+                    ->default('0'),
             ]);
     }
 }

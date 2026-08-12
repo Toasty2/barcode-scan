@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Products\Tables;
 
+use App\Filament\Support\PriceColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -21,8 +22,7 @@ class ProductsTable
                     ->weight(FontWeight::Medium),
                 TextColumn::make('product_name')
                     ->searchable(),
-                TextColumn::make('price')
-                    ->money('GBP')
+                PriceColumn::make('price')
                     ->sortable(),
                 TextColumn::make('last_confirmed')
                     ->label('Last confirmed')

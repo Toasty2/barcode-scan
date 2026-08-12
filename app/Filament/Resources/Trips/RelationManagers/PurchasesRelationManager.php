@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Trips\RelationManagers;
 
+use App\Filament\Support\PriceColumn;
+use App\Filament\Support\PriceInput;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -36,10 +38,8 @@ class PurchasesRelationManager extends RelationManager
                     ->required()
                     ->numeric()
                     ->default(1),
-                TextInput::make('unit_price')
-                    ->required()
-                    ->numeric()
-                    ->prefix('£'),
+                PriceInput::make('unit_price')
+                    ->required(),
             ]);
     }
 
@@ -56,12 +56,10 @@ class PurchasesRelationManager extends RelationManager
                     ->badge(),
                 TextColumn::make('quantity')
                     ->numeric(),
-                TextColumn::make('unit_price')
-                    ->money('GBP'),
-                TextColumn::make('line_total')
+                PriceColumn::make('unit_price'),
+                PriceColumn::make('line_total')
                     ->label('Line total')
-                    ->state(fn ($record) => $record->quantity * $record->unit_price)
-                    ->money('GBP'),
+                    ->state(fn ($record) => $record->unit_price->multiply($record->quantity)),
             ])
             ->recordActions([
                 EditAction::make(),

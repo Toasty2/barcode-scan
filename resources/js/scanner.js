@@ -1,3 +1,5 @@
+import { GBP, toMinorUnits, toMajorUnitsString } from './currency.js';
+
 const BARCODE_FORMATS = ['ean_13', 'ean_8', 'upc_a', 'upc_e'];
 const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').content;
 const APP_BASE_URL = document.querySelector('meta[name="app-base-url"]').content;
@@ -165,7 +167,7 @@ async function performLookup(upc) {
 
     if (own.outcome === 'found') {
         entryName.value = own.productName;
-        entryPrice.value = own.price;
+        entryPrice.value = toMajorUnitsString(own.price, GBP);
         entryStaleWarning.classList.toggle('hidden', !own.stale);
         setStatus('Found cached price — check and add.');
         return;
@@ -265,16 +267,16 @@ async function submitTrip() {
         upc: row.dataset.upc || null,
         entry_type: row.dataset.entryType,
         product_name: row.querySelector('.item-name').value.trim(),
-        price: parseFloat(row.querySelector('.item-price').value),
+        price: toMinorUnits(row.querySelector('.item-price').value, GBP),
         quantity: parseInt(row.querySelector('.item-quantity').value, 10) || 1,
     }));
 
-    if (items.some((item) => !item.product_name || Number.isNaN(item.price))) {
+    if (items.some((item) => !item.product_name || item.price === null)) {
         submitStatus.textContent = 'Every item needs a name and a valid price.';
         return;
     }
 
-    const discount = parseFloat(tripDiscount.value) || 0;
+    const discount = toMinorUnits(tripDiscount.value, GBP) ?? 0;
 
     submitTripBtn.disabled = true;
     submitStatus.textContent = 'Saving trip…';

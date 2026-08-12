@@ -38,7 +38,7 @@ class ResourcesTest extends TestCase
         $product = Product::create([
             'upc' => '5010102115521',
             'product_name' => 'Robinsons Dbl Con Sum Fruits 1.75ltr',
-            'price' => 3.00,
+            'price' => 300,
             'last_confirmed' => now(),
         ]);
 
@@ -71,7 +71,7 @@ class ResourcesTest extends TestCase
 
     public function test_trips_list_shows_records(): void
     {
-        $trip = Trip::create(['shopped_on' => today(), 'discount' => 2.50]);
+        $trip = Trip::create(['shopped_on' => today(), 'discount' => 250]);
 
         $this->actingAs($this->user);
 
@@ -85,7 +85,7 @@ class ResourcesTest extends TestCase
         Product::create([
             'upc' => '5010102115521',
             'product_name' => 'Robinsons',
-            'price' => 3.00,
+            'price' => 300,
             'last_confirmed' => now(),
         ]);
 
@@ -95,7 +95,7 @@ class ResourcesTest extends TestCase
             'product_name' => 'Robinsons',
             'entry_type' => 'scan',
             'quantity' => 1,
-            'unit_price' => 3.00,
+            'unit_price' => 300,
         ]);
 
         $this->actingAs($this->user);
@@ -119,7 +119,7 @@ class ResourcesTest extends TestCase
             'product_name' => 'Test Item',
             'entry_type' => 'lump_sum',
             'quantity' => 1,
-            'unit_price' => 10.00,
+            'unit_price' => 1000,
         ]);
 
         $this->actingAs($this->user);

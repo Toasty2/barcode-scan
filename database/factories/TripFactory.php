@@ -19,7 +19,7 @@ class TripFactory extends Factory
     {
         return [
             'shopped_on' => fake()->dateTimeBetween('-3 months', 'now'),
-            'discount' => fake()->boolean(20) ? fake()->randomFloat(2, 0.5, 3) : 0,
+            'discount' => fake()->boolean(20) ? fake()->numberBetween(50, 300) : 0,
         ];
     }
 }

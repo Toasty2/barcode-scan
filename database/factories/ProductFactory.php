@@ -31,7 +31,7 @@ class ProductFactory extends Factory
                 'Mattessons Smoked Pork Sausage 260g',
                 'Rombouts Coffee',
             ]),
-            'price' => fake()->randomFloat(2, 0.5, 6),
+            'price' => fake()->numberBetween(50, 600),
             'last_confirmed' => fake()->dateTimeBetween('-3 months', 'now'),
         ];
     }

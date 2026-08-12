@@ -13,11 +13,11 @@ class TripController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'discount' => ['nullable', 'numeric', 'min:0'],
+            'discount' => ['nullable', 'integer', 'min:0'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.upc' => ['nullable', 'string', 'max:32'],
             'items.*.product_name' => ['required', 'string', 'max:255'],
-            'items.*.price' => ['required', 'numeric'],
+            'items.*.price' => ['required', 'integer'],
             'items.*.quantity' => ['required', 'integer', 'min:1'],
             'items.*.entry_type' => ['required', 'in:scan'],
         ]);

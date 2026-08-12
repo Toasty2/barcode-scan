@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Purchases\Schemas;
 
+use App\Filament\Support\PriceInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
@@ -31,10 +32,8 @@ class PurchaseForm
                     ->required()
                     ->numeric()
                     ->default(1),
-                TextInput::make('unit_price')
-                    ->required()
-                    ->numeric()
-                    ->prefix('£'),
+                PriceInput::make('unit_price')
+                    ->required(),
             ]);
     }
 }

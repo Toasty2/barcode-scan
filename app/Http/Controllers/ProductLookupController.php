@@ -20,7 +20,7 @@ class ProductLookupController extends Controller
         return response()->json([
             'found' => true,
             'product_name' => $product->product_name,
-            'price' => $product->price,
+            'price' => $product->price->minorUnits,
             'last_confirmed' => $product->last_confirmed,
             'stale' => $product->last_confirmed->lt(now()->subDays(self::STALE_DAYS)),
         ]);

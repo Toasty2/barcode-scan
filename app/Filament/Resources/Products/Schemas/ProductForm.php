@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Products\Schemas;
 
+use App\Filament\Support\PriceInput;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
@@ -19,10 +20,8 @@ class ProductForm
                     ->disabledOn('edit'),
                 TextInput::make('product_name')
                     ->required(),
-                TextInput::make('price')
-                    ->required()
-                    ->numeric()
-                    ->prefix('£'),
+                PriceInput::make('price')
+                    ->required(),
                 DateTimePicker::make('last_confirmed')
                     ->required(),
             ]);
