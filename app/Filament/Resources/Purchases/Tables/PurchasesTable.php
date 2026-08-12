@@ -1,0 +1,60 @@
+<?php
+
+namespace App\Filament\Resources\Purchases\Tables;
+
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+
+class PurchasesTable
+{
+    public static function configure(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('trip.shopped_on')
+                    ->label('Trip date')
+                    ->date('d/m/Y')
+                    ->sortable(),
+                TextColumn::make('upc')
+                    ->label('UPC')
+                    ->searchable(),
+                TextColumn::make('product_name')
+                    ->searchable(),
+                TextColumn::make('entry_type')
+                    ->label('Type')
+                    ->badge(),
+                TextColumn::make('quantity')
+                    ->numeric()
+                    ->sortable(),
+                TextColumn::make('unit_price')
+                    ->money('GBP')
+                    ->sortable(),
+                TextColumn::make('line_total')
+                    ->label('Line total')
+                    ->state(fn ($record) => $record->quantity * $record->unit_price)
+                    ->money('GBP'),
+                TextColumn::make('created_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                //
+            ])
+            ->recordActions([
+                EditAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+}
