@@ -42,6 +42,23 @@ class Trip extends Model
     }
 
     /**
+     * This trip's own total, net of its discount. Assumes `purchases` is
+     * already loaded (or lazy-loads it) — unlike the static period sums
+     * below, this operates on a single already-fetched trip rather than
+     * running its own aggregate query.
+     */
+    public function netSpend(): Price
+    {
+        $grossMinorUnits = $this->purchases->sum(
+            fn (Purchase $purchase) => $purchase->quantity * $purchase->unit_price->minorUnits
+        );
+
+        $currencyClass = config('money.default_currency');
+
+        return new Price($grossMinorUnits - $this->discount->minorUnits, new $currencyClass());
+    }
+
+    /**
      * Total spend across trips in the given date range, net of each trip's
      * discount — the line-item total minus discounts, not just the raw sum.
      * Both sums happen as integer minor-unit arithmetic in SQL
