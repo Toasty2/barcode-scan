@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class Trip extends Model
@@ -65,5 +67,65 @@ class Trip extends Model
     public static function netSpendForYear(CarbonInterface $year): Price
     {
         return static::netSpendForPeriod($year->clone()->startOfYear(), $year->clone()->endOfYear());
+    }
+
+    /**
+     * Every calendar year with at least one trip in it, from the earliest
+     * trip's year up to the current year — the range a year-over-year
+     * comparison should cover, even for years with no trips in between.
+     */
+    public static function yearsWithTrips(): Collection
+    {
+        $earliest = static::min('shopped_on');
+
+        if ($earliest === null) {
+            return collect([Carbon::now()->year]);
+        }
+
+        return collect(range(Carbon::parse($earliest)->year, Carbon::now()->year));
+    }
+
+    public static function countForYear(int $year): int
+    {
+        return static::whereYear('shopped_on', $year)->count();
+    }
+
+    public static function itemCountForYear(int $year): int
+    {
+        return (int) static::whereYear('shopped_on', $year)
+            ->join('purchases', 'purchases.trip_id', '=', 'trips.id')
+            ->sum('purchases.quantity');
+    }
+
+    /**
+     * Net spend for the given year, grouped by shop (including an
+     * "unassigned" bucket for trips with no shop set). Aggregated in PHP
+     * over eager-loaded trips/purchases rather than a single grouped SQL
+     * query, since joining purchases and trips in one query would multiply
+     * each trip's discount once per purchase row — the same reason
+     * netSpendForPeriod() sums gross and discount as two separate queries.
+     *
+     * @return Collection<int, array{shop: ?Shop, spend: Price}>
+     */
+    public static function netSpendByShopForYear(int $year): Collection
+    {
+        $currencyClass = config('money.default_currency');
+
+        return static::whereYear('shopped_on', $year)
+            ->with(['shop', 'purchases'])
+            ->get()
+            ->groupBy('shop_id')
+            ->map(function (Collection $trips) use ($currencyClass) {
+                $grossMinorUnits = $trips->sum(
+                    fn (self $trip) => $trip->purchases->sum(fn (Purchase $purchase) => $purchase->quantity * $purchase->unit_price->minorUnits)
+                );
+                $discountMinorUnits = $trips->sum(fn (self $trip) => $trip->discount->minorUnits);
+
+                return [
+                    'shop' => $trips->first()->shop,
+                    'spend' => new Price($grossMinorUnits - $discountMinorUnits, new $currencyClass()),
+                ];
+            })
+            ->values();
     }
 }

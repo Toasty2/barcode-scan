@@ -35,6 +35,18 @@ class PriceTest extends TestCase
         $this->assertSame(597, (new Price(199, new GBP()))->multiply(3)->minorUnits);
     }
 
+    public function test_divide_rounds_to_the_nearest_minor_unit(): void
+    {
+        $this->assertSame(66, (new Price(199, new GBP()))->divide(3)->minorUnits);
+    }
+
+    public function test_divide_by_zero_throws(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        (new Price(199, new GBP()))->divide(0);
+    }
+
     public function test_is_negative_and_abs(): void
     {
         $negative = new Price(-250, new GBP());

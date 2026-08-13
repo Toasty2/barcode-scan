@@ -38,8 +38,10 @@ class DatabaseSeeder extends Seeder
         BudgetChange::create(['amount' => 20000, 'effective_from' => Carbon::now()->subMonths(2)->startOfMonth()]);
         BudgetChange::create(['amount' => 25000, 'effective_from' => Carbon::now()->startOfMonth()]);
 
-        foreach ([2, 1, 0] as $monthsAgo) {
-            $tripsThisMonth = $monthsAgo === 0 ? 2 : 3;
+        // 3 years of months, so the yearly-totals/year-over-year widgets
+        // have real multi-year spread to compare rather than a single year.
+        foreach (range(35, 0) as $monthsAgo) {
+            $tripsThisMonth = $monthsAgo === 0 ? 2 : fake()->numberBetween(2, 4);
 
             for ($i = 0; $i < $tripsThisMonth; $i++) {
                 $shoppedOn = Carbon::now()->subMonths($monthsAgo)->startOfMonth()->addDays(fake()->numberBetween(0, 27));

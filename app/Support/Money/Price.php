@@ -47,6 +47,18 @@ final class Price
         return new self($this->minorUnits * $factor, $this->currency);
     }
 
+    /**
+     * Rounds to the nearest minor unit rather than truncating.
+     */
+    public function divide(int $divisor): self
+    {
+        if ($divisor === 0) {
+            throw new InvalidArgumentException('Cannot divide a Price by zero.');
+        }
+
+        return new self((int) round($this->minorUnits / $divisor), $this->currency);
+    }
+
     public function isNegative(): bool
     {
         return $this->minorUnits < 0;
