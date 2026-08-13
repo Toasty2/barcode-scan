@@ -11,6 +11,8 @@ class CreateBudgetChange extends CreateRecord
 {
     protected static string $resource = BudgetChangeResource::class;
 
+    protected static bool $canCreateAnother = false;
+
     /**
      * A change made earlier this same (still-current) month is a correction,
      * not a rewrite of history, so it updates that month's entry in place
