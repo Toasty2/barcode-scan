@@ -20,11 +20,17 @@ class BudgetChangeResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCalculator;
 
-    protected static ?string $modelLabel = 'Budget';
-
-    protected static ?string $pluralModelLabel = 'Budget';
-
     protected static ?string $slug = 'budget';
+
+    public static function getModelLabel(): string
+    {
+        return __('Budget');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Budget');
+    }
 
     public static function form(Schema $schema): Schema
     {

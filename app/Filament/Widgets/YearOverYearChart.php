@@ -4,13 +4,17 @@ namespace App\Filament\Widgets;
 
 use App\Models\Trip;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Carbon;
 
 class YearOverYearChart extends ChartWidget
 {
     protected static ?int $sort = 4;
 
-    protected ?string $heading = 'Spend by month, year over year';
+    public function getHeading(): string|Htmlable|null
+    {
+        return __('Spend by month, year over year');
+    }
 
     protected function getData(): array
     {

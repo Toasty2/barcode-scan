@@ -25,10 +25,10 @@ class AnnualOverview extends StatsOverviewWidget
         $itemCount = Trip::itemCountForYear($year);
 
         return [
-            Stat::make('Total spend', $spend->format()),
-            Stat::make('Trips', (string) $tripCount),
-            Stat::make('Items bought', (string) $itemCount),
-            Stat::make('Average per trip', $tripCount > 0 ? $spend->divide($tripCount)->format() : '—'),
+            Stat::make(__('Total spend'), $spend->format()),
+            Stat::make(__('Trips'), (string) $tripCount),
+            Stat::make(__('Items bought'), (string) $itemCount),
+            Stat::make(__('Average per trip'), $tripCount > 0 ? $spend->divide($tripCount)->format() : '—'),
         ];
     }
 }

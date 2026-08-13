@@ -16,7 +16,7 @@ class TripForm
                 DatePicker::make('shopped_on')
                     ->required(),
                 Select::make('shop_id')
-                    ->label('Shop')
+                    ->label(__('Shop'))
                     ->relationship('shop', 'name')
                     ->searchable(),
                 PriceInput::make('discount')

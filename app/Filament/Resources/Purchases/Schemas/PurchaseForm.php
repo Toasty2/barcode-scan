@@ -19,13 +19,13 @@ class PurchaseForm
                     ->searchable()
                     ->required(),
                 TextInput::make('upc')
-                    ->label('UPC')
+                    ->label(__('UPC'))
                     ->maxLength(32),
                 TextInput::make('product_name')
                     ->required(),
                 Select::make('entry_type')
-                    ->label('Type')
-                    ->options(['scan' => 'Scan', 'lump_sum' => 'Lump sum'])
+                    ->label(__('Type'))
+                    ->options(['scan' => __('Scan'), 'lump_sum' => __('Lump sum')])
                     ->default('scan')
                     ->required(),
                 TextInput::make('quantity')

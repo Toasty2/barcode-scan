@@ -27,17 +27,20 @@ class AnnualSummary extends Page
 {
     use HasFiltersForm;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Statistics';
-
     // A plain dash rather than a pictorial icon — subpages in this group
     // stay visually quiet rather than each competing for a distinct icon.
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMinus;
+
+    public static function getNavigationGroup(): string|UnitEnum|null
+    {
+        return __('Statistics');
+    }
 
     public function filtersForm(Schema $schema): Schema
     {
         return $schema->components([
             Select::make('year')
-                ->label('Year')
+                ->label(__('Year'))
                 ->options(fn () => Trip::yearsWithTrips()->mapWithKeys(fn (int $year) => [$year => (string) $year])->all())
                 ->default(Carbon::now()->year)
                 ->selectablePlaceholder(false)
@@ -49,13 +52,13 @@ class AnnualSummary extends Page
     {
         return [
             Action::make('previousYear')
-                ->label('Previous year')
+                ->label(__('Previous year'))
                 ->icon(Heroicon::OutlinedChevronLeft)
                 ->iconButton()
                 ->disabled(fn () => ! $this->hasYear($this->selectedYear() - 1))
                 ->action(fn () => $this->selectYear($this->selectedYear() - 1)),
             Action::make('nextYear')
-                ->label('Next year')
+                ->label(__('Next year'))
                 ->icon(Heroicon::OutlinedChevronRight)
                 ->iconButton()
                 ->disabled(fn () => ! $this->hasYear($this->selectedYear() + 1))
@@ -83,7 +86,7 @@ class AnnualSummary extends Page
                     AnnualBudgetAdherence::class,
                 ]),
             ]),
-            Text::make('Total spend by year')
+            Text::make(__('Total spend by year'))
                 ->size(TextSize::Large)
                 ->weight(FontWeight::Bold),
             Grid::make(1)->schema(

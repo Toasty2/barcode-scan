@@ -17,7 +17,7 @@ class BudgetChangesTable
             ->defaultSort('effective_from', 'desc')
             ->columns([
                 TextColumn::make('effective_from')
-                    ->label('Effective from')
+                    ->label(__('Effective from'))
                     ->date('F Y')
                     ->sortable(),
                 PriceColumn::make('amount')

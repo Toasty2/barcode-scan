@@ -18,13 +18,13 @@ class TripsTable
             ->defaultSort('shopped_on', 'desc')
             ->columns([
                 TextColumn::make('shopped_on')
-                    ->label('Date')
+                    ->label(__('Date'))
                     ->date('d/m/Y')
                     ->sortable(),
                 TextColumn::make('purchases_count')
-                    ->label('Items'),
+                    ->label(__('Items')),
                 TextColumn::make('shop.name')
-                    ->label('Shop')
+                    ->label(__('Shop'))
                     ->badge()
                     ->color(fn ($record) => $record->shop?->badgeColor())
                     ->placeholder('—'),

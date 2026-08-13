@@ -24,14 +24,14 @@ class PurchasesRelationManager extends RelationManager
         return $schema
             ->components([
                 TextInput::make('upc')
-                    ->label('UPC')
+                    ->label(__('UPC'))
                     ->maxLength(32),
                 TextInput::make('product_name')
                     ->required()
                     ->maxLength(255),
                 Select::make('entry_type')
-                    ->label('Type')
-                    ->options(['scan' => 'Scan', 'lump_sum' => 'Lump sum'])
+                    ->label(__('Type'))
+                    ->options(['scan' => __('Scan'), 'lump_sum' => __('Lump sum')])
                     ->default('scan')
                     ->required(),
                 TextInput::make('quantity')
@@ -50,13 +50,13 @@ class PurchasesRelationManager extends RelationManager
             ->columns([
                 TextColumn::make('product_name'),
                 TextColumn::make('entry_type')
-                    ->label('Type')
+                    ->label(__('Type'))
                     ->badge(),
                 TextColumn::make('quantity')
                     ->numeric(),
                 PriceColumn::make('unit_price'),
                 PriceColumn::make('line_total')
-                    ->label('Line total')
+                    ->label(__('Line total'))
                     ->state(fn ($record) => $record->unit_price->multiply($record->quantity)),
             ])
             ->recordActions([

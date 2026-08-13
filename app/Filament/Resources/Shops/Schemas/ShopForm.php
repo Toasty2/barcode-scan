@@ -17,10 +17,10 @@ class ShopForm
                     ->required()
                     ->maxLength(255),
                 ColorPicker::make('colour')
-                    ->helperText('Used for this shop\'s tag colour. A lighter background shade is derived from it automatically.'),
+                    ->helperText(__('Used for this shop\'s tag colour. A lighter background shade is derived from it automatically.')),
                 Toggle::make('is_default')
-                    ->label('Default')
-                    ->helperText('Pre-selected when logging a new trip. Only one shop can be the default.'),
+                    ->label(__('Default'))
+                    ->helperText(__('Pre-selected when logging a new trip. Only one shop can be the default.')),
             ]);
     }
 }

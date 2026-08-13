@@ -12,9 +12,9 @@ class BudgetChangeForm
         return $schema
             ->components([
                 PriceInput::make('amount')
-                    ->label('New monthly budget')
+                    ->label(__('New monthly budget'))
                     ->required()
-                    ->helperText('Applies from the start of this calendar month onwards. Past months keep whatever budget was in effect for them at the time.'),
+                    ->helperText(__('Applies from the start of this calendar month onwards. Past months keep whatever budget was in effect for them at the time.')),
             ]);
     }
 }

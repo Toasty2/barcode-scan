@@ -20,7 +20,7 @@ class ShopsTable
                     ->badge()
                     ->color(fn ($record) => $record->badgeColor()),
                 IconColumn::make('is_default')
-                    ->label('Default')
+                    ->label(__('Default'))
                     ->boolean(),
             ])
             ->filters([

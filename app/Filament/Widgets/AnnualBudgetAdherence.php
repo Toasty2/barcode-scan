@@ -26,23 +26,26 @@ class AnnualBudgetAdherence extends StatsOverviewWidget
 
         if ($totalBudget === null) {
             return [
-                Stat::make('Budget adherence', 'No budget set')
-                    ->description("No budget was in effect during {$year}")
+                Stat::make(__('Budget adherence'), __('No budget set'))
+                    ->description(__('No budget was in effect during :year', ['year' => $year]))
                     ->color('gray'),
             ];
         }
 
         $remaining = $totalBudget->subtract($totalSpend);
-        $monthsLabel = $monthsWithBudget === 1 ? '1 month' : "{$monthsWithBudget} months";
 
         return [
-            Stat::make('Budget', $totalBudget->format())
-                ->description("Across {$monthsLabel} with a budget set"),
-            Stat::make('Spend', $totalSpend->format())
+            Stat::make(__('Budget'), $totalBudget->format())
+                ->description(trans_choice(
+                    'Across :count month with a budget set|Across :count months with a budget set',
+                    $monthsWithBudget,
+                    ['count' => $monthsWithBudget],
+                )),
+            Stat::make(__('Spend'), $totalSpend->format())
                 ->description(match (true) {
-                    $remaining->minorUnits === 0 => 'Exactly on budget',
-                    ! $remaining->isNegative() => $remaining->format().' under budget',
-                    default => $remaining->abs()->format().' over budget',
+                    $remaining->minorUnits === 0 => __('Exactly on budget'),
+                    ! $remaining->isNegative() => __(':amount under budget', ['amount' => $remaining->format()]),
+                    default => __(':amount over budget', ['amount' => $remaining->abs()->format()]),
                 })
                 ->color(match (true) {
                     $remaining->minorUnits === 0 => 'gray',

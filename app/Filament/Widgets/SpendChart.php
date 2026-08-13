@@ -4,6 +4,7 @@ namespace App\Filament\Widgets;
 
 use App\Models\Trip;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
@@ -11,19 +12,22 @@ class SpendChart extends ChartWidget
 {
     protected static ?int $sort = 2;
 
-    protected ?string $heading = 'Spend';
-
     public ?string $filter = '3m';
+
+    public function getHeading(): string|Htmlable|null
+    {
+        return __('Spend');
+    }
 
     protected function getFilters(): ?array
     {
         return [
-            '3m' => 'Last 3 months',
-            '6m' => 'Last 6 months',
-            '1y' => 'Last year',
-            '3y' => 'Last 3 years',
-            '5y' => 'Last 5 years',
-            'all' => 'All time',
+            '3m' => __('Last 3 months'),
+            '6m' => __('Last 6 months'),
+            '1y' => __('Last year'),
+            '3y' => __('Last 3 years'),
+            '5y' => __('Last 5 years'),
+            'all' => __('All time'),
         ];
     }
 
@@ -34,7 +38,7 @@ class SpendChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Spend',
+                    'label' => __('Spend'),
                     'data' => $months->map(fn (Carbon $month) => Trip::netSpendForMonth($month)->toMajorUnits())->all(),
                 ],
             ],

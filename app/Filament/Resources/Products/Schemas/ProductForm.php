@@ -14,7 +14,7 @@ class ProductForm
         return $schema
             ->components([
                 TextInput::make('upc')
-                    ->label('UPC')
+                    ->label(__('UPC'))
                     ->required()
                     ->maxLength(32)
                     ->disabledOn('edit'),

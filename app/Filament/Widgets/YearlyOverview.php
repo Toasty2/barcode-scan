@@ -41,9 +41,9 @@ class YearlyOverview extends StatsOverviewWidget
         $diff = $spend->subtract($previousSpend);
 
         return match (true) {
-            $diff->minorUnits === 0 => "Same as {$previousYear}",
-            $diff->isNegative() => $diff->abs()->format()." less than {$previousYear}",
-            default => $diff->format()." more than {$previousYear}",
+            $diff->minorUnits === 0 => __('Same as :year', ['year' => $previousYear]),
+            $diff->isNegative() => __(':amount less than :year', ['amount' => $diff->abs()->format(), 'year' => $previousYear]),
+            default => __(':amount more than :year', ['amount' => $diff->format(), 'year' => $previousYear]),
         };
     }
 

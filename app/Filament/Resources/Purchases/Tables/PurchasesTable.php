@@ -17,13 +17,13 @@ class PurchasesTable
             ->defaultSort('trip.shopped_on', 'desc')
             ->columns([
                 TextColumn::make('trip.shopped_on')
-                    ->label('Trip date')
+                    ->label(__('Trip date'))
                     ->date('d/m/Y')
                     ->sortable(),
                 TextColumn::make('product_name')
                     ->searchable(),
                 TextColumn::make('entry_type')
-                    ->label('Type')
+                    ->label(__('Type'))
                     ->badge(),
                 TextColumn::make('quantity')
                     ->numeric()
@@ -31,7 +31,7 @@ class PurchasesTable
                 PriceColumn::make('unit_price')
                     ->sortable(),
                 PriceColumn::make('line_total')
-                    ->label('Line total')
+                    ->label(__('Line total'))
                     ->state(fn ($record) => $record->unit_price->multiply($record->quantity)),
                 TextColumn::make('created_at')
                     ->dateTime()

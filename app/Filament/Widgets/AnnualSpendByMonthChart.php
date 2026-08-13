@@ -5,6 +5,7 @@ namespace App\Filament\Widgets;
 use App\Models\Trip;
 use Filament\Widgets\ChartWidget;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Carbon;
 
 class AnnualSpendByMonthChart extends ChartWidget
@@ -15,7 +16,10 @@ class AnnualSpendByMonthChart extends ChartWidget
     // Dashboard.
     protected static bool $isDiscovered = false;
 
-    protected ?string $heading = 'Spend by month';
+    public function getHeading(): string|Htmlable|null
+    {
+        return __('Spend by month');
+    }
 
     protected function getData(): array
     {
@@ -38,7 +42,7 @@ class AnnualSpendByMonthChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Spend',
+                    'label' => __('Spend'),
                     'data' => $data->all(),
                 ],
             ],

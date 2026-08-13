@@ -23,11 +23,11 @@ class SpendOverview extends StatsOverviewWidget
         $thisYearSpend = Trip::netSpendForYear($now);
 
         return [
-            Stat::make('This month', $thisMonthSpend->format())
+            Stat::make(__('This month'), $thisMonthSpend->format())
                 ->description(match (true) {
-                    $remaining === null => 'No budget set for this month',
-                    ! $remaining->isNegative() => $remaining->format().' under budget',
-                    default => $remaining->abs()->format().' over budget',
+                    $remaining === null => __('No budget set for this month'),
+                    ! $remaining->isNegative() => __(':amount under budget', ['amount' => $remaining->format()]),
+                    default => __(':amount over budget', ['amount' => $remaining->abs()->format()]),
                 })
                 ->color(match (true) {
                     $remaining === null => 'gray',
@@ -35,7 +35,7 @@ class SpendOverview extends StatsOverviewWidget
                     default => 'danger',
                 }),
 
-            Stat::make('This year', $thisYearSpend->format()),
+            Stat::make(__('This year'), $thisYearSpend->format()),
         ];
     }
 }

@@ -23,7 +23,7 @@ class ProductsTable
                 PriceColumn::make('price')
                     ->sortable(),
                 TextColumn::make('last_confirmed')
-                    ->label('Last confirmed')
+                    ->label(__('Last confirmed'))
                     ->dateTime('d/m/Y')
                     ->sortable()
                     ->badge()
