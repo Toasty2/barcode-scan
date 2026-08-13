@@ -3,6 +3,7 @@
 namespace Tests\Feature\Filament;
 
 use App\Filament\Resources\Products\Pages\ViewProduct;
+use App\Filament\Widgets\ProductOverview;
 use App\Filament\Widgets\ProductPriceHistoryChart;
 use App\Models\Product;
 use App\Models\Trip;
@@ -40,6 +41,38 @@ class ViewProductTest extends TestCase
         $product = $this->createProduct();
 
         Livewire::test(ViewProduct::class, ['record' => $product->getKey()])->assertSuccessful();
+    }
+
+    public function test_overview_shows_the_products_fields_as_stats(): void
+    {
+        $product = $this->createProduct();
+
+        $widget = new ProductOverview();
+        $widget->record = $product;
+
+        $stats = (new ReflectionMethod(ProductOverview::class, 'getStats'))->invoke($widget);
+
+        $this->assertSame('Coca Cola', $stats[1]->getValue());
+        $this->assertSame('£1.50', $stats[2]->getValue());
+    }
+
+    public function test_overview_truncates_a_long_upc_and_keeps_the_full_value_in_the_title_attribute(): void
+    {
+        $product = Product::create([
+            'upc' => '12345678901234567890',
+            'product_name' => 'Long UPC Item',
+            'price' => 100,
+            'last_confirmed' => now(),
+        ]);
+
+        $widget = new ProductOverview();
+        $widget->record = $product;
+
+        $stats = (new ReflectionMethod(ProductOverview::class, 'getStats'))->invoke($widget);
+
+        $this->assertNotSame($product->upc, $stats[0]->getValue());
+        $this->assertStringStartsWith('1234567890123', $stats[0]->getValue());
+        $this->assertSame($product->upc, $stats[0]->getExtraAttributes()['title']);
     }
 
     public function test_chart_has_no_data_points_when_the_product_has_no_purchase_history(): void

@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Trip;
+use App\Support\Charts\CategoricalPalette;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Carbon;
@@ -15,21 +16,6 @@ class YearOverYearChart extends ChartWidget
     {
         return __('Spend by month, year over year');
     }
-
-    // A qualitative palette (distinct hues, not shades of one colour) so
-    // each year's line stays visually distinguishable regardless of how
-    // many years are plotted at once. Cycles if there are ever more years
-    // than colours.
-    private const COLOURS = [
-        '#2563eb', // blue
-        '#dc2626', // red
-        '#16a34a', // green
-        '#9333ea', // purple
-        '#d97706', // amber
-        '#0891b2', // cyan
-        '#db2777', // pink
-        '#65a30d', // lime
-    ];
 
     protected function getData(): array
     {
@@ -49,7 +35,7 @@ class YearOverYearChart extends ChartWidget
                 return Trip::netSpendForMonth($monthStart)->toMajorUnits();
             });
 
-            $colour = self::COLOURS[$index % count(self::COLOURS)];
+            $colour = CategoricalPalette::colour($index);
 
             return [
                 'label' => (string) $year,
