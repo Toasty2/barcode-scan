@@ -38,6 +38,14 @@ class DatabaseSeeder extends Seeder
         BudgetChange::create(['amount' => 20000, 'effective_from' => Carbon::now()->subMonths(2)->startOfMonth()]);
         BudgetChange::create(['amount' => 25000, 'effective_from' => Carbon::now()->startOfMonth()]);
 
+        // Each product drifts up from some lower price 3 years ago to
+        // exactly its current cached price today (plus a little noise per
+        // purchase), so the price-history chart has something real to show
+        // instead of every purchase pinning the same flat cached price.
+        $priceDriftFactors = $products->mapWithKeys(
+            fn (Product $product) => [$product->upc => fake()->randomFloat(2, 0.05, 0.20)]
+        );
+
         // 3 years of months, so the yearly-totals/year-over-year widgets
         // have real multi-year spread to compare rather than a single year.
         foreach (range(35, 0) as $monthsAgo) {
@@ -53,12 +61,18 @@ class DatabaseSeeder extends Seeder
                 ]);
 
                 foreach ($products->random(fake()->numberBetween(4, 6)) as $product) {
+                    $progressToNow = (35 - $monthsAgo) / 35;
+                    $drift = $priceDriftFactors[$product->upc];
+                    $trendPrice = $product->price->minorUnits * (1 - $drift + ($drift * $progressToNow));
+                    $noise = fake()->numberBetween(-3, 3) / 100;
+                    $unitPrice = max(1, (int) round($trendPrice * (1 + $noise)));
+
                     $trip->purchases()->create([
                         'upc' => $product->upc,
                         'product_name' => $product->product_name,
                         'entry_type' => 'scan',
                         'quantity' => fake()->numberBetween(1, 3),
-                        'unit_price' => $product->price,
+                        'unit_price' => $unitPrice,
                     ]);
                 }
             }
