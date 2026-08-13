@@ -10,6 +10,7 @@ use App\Filament\Resources\Products\Schemas\ProductForm;
 use App\Filament\Resources\Products\Tables\ProductsTable;
 use App\Models\Product;
 use BackedEnum;
+use Filament\Infolists\Components\ImageEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -29,6 +30,20 @@ class ProductResource extends Resource
     public static function table(Table $table): Table
     {
         return ProductsTable::configure($table);
+    }
+
+    // Purely a decorative photo on the View page — hidden entirely rather
+    // than showing a placeholder when a product has no image yet.
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema->components([
+            ImageEntry::make('image_path')
+                ->hiddenLabel()
+                ->disk('public')
+                ->height(200)
+                ->alt(fn (?Product $record) => $record?->product_name)
+                ->visible(fn (?Product $record) => filled($record?->image_path)),
+        ]);
     }
 
     public static function getRelations(): array

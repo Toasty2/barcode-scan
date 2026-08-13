@@ -8,6 +8,7 @@ cd "$APP_DIR"
 
 composer install --no-dev --optimize-autoloader --no-interaction
 php artisan migrate --force
+php artisan storage:link
 
 rm -rf "${PUBLIC_DIR:?}"/*
 cp -r public/. "$PUBLIC_DIR/"

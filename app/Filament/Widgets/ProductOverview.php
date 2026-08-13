@@ -2,13 +2,16 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Widgets\Concerns\HasResponsiveStatsColumns;
 use App\Models\Product;
+use App\Models\Purchase;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
-use Illuminate\Support\Str;
 
 class ProductOverview extends StatsOverviewWidget
 {
+    use HasResponsiveStatsColumns;
+
     // Shown only on a product's View page, not auto-attached to the
     // Dashboard.
     protected static bool $isDiscovered = false;
@@ -22,12 +25,43 @@ class ProductOverview extends StatsOverviewWidget
         }
 
         return [
-            Stat::make(__('UPC'), Str::limit($this->record->upc, 16))
-                ->extraAttributes(['title' => e($this->record->upc)]),
-            Stat::make(__('Product name'), $this->record->product_name),
             Stat::make(__('Price'), $this->record->price->format()),
-            Stat::make(__('Last confirmed'), $this->record->last_confirmed->format('d/m/Y'))
+            Stat::make(__('Last confirmed price'), $this->record->last_confirmed->format('d/m/Y'))
                 ->color($this->record->last_confirmed->lt(now()->subDays(90)) ? 'warning' : 'success'),
+            $this->totalPurchasesStat(),
+            $this->priceDeltaStat(),
         ];
+    }
+
+    private function priceDeltaStat(): Stat
+    {
+        $history = Purchase::priceHistoryForUpc($this->record->upc);
+
+        if ($history->isEmpty()) {
+            return Stat::make(__('Price delta'), __('No purchase history yet'));
+        }
+
+        $firstPurchase = $history->first();
+        $delta = $history->last()['price']->subtract($firstPurchase['price']);
+        $firstDate = $firstPurchase['date']->format('d/m/Y');
+
+        return Stat::make(__('Price delta'), $delta->format())
+            ->description(match (true) {
+                $delta->minorUnits === 0 => __('Same as first purchase on :date', ['date' => $firstDate]),
+                $delta->isNegative() => __('Cheaper than first purchase on :date', ['date' => $firstDate]),
+                default => __('More expensive than first purchase on :date', ['date' => $firstDate]),
+            })
+            ->color(match (true) {
+                $delta->minorUnits === 0 => 'gray',
+                $delta->isNegative() => 'success',
+                default => 'danger',
+            });
+    }
+
+    private function totalPurchasesStat(): Stat
+    {
+        $totalQuantity = (int) Purchase::where('upc', $this->record->upc)->sum('quantity');
+
+        return Stat::make(__('Total purchases'), (string) $totalQuantity);
     }
 }

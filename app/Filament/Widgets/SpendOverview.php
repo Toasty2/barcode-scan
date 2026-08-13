@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Widgets\Concerns\HasResponsiveStatsColumns;
 use App\Models\BudgetChange;
 use App\Models\Trip;
 use Filament\Widgets\StatsOverviewWidget;
@@ -10,6 +11,8 @@ use Illuminate\Support\Carbon;
 
 class SpendOverview extends StatsOverviewWidget
 {
+    use HasResponsiveStatsColumns;
+
     protected static ?int $sort = 1;
 
     protected function getStats(): array

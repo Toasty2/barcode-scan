@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Widgets\Concerns\HasResponsiveStatsColumns;
 use App\Models\Trip;
 use App\Support\Money\Price;
 use Filament\Widgets\StatsOverviewWidget;
@@ -10,6 +11,8 @@ use Illuminate\Support\Carbon;
 
 class YearlyOverview extends StatsOverviewWidget
 {
+    use HasResponsiveStatsColumns;
+
     // Shown on the Annual Summary page (App\Filament\Pages\AnnualSummary),
     // not auto-attached to the main Dashboard, which is kept lightweight.
     protected static bool $isDiscovered = false;

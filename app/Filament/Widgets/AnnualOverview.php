@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Widgets\Concerns\HasResponsiveStatsColumns;
 use App\Models\Trip;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\StatsOverviewWidget;
@@ -10,6 +11,7 @@ use Illuminate\Support\Carbon;
 
 class AnnualOverview extends StatsOverviewWidget
 {
+    use HasResponsiveStatsColumns;
     use InteractsWithPageFilters;
 
     // Shown only on the Annual Summary page, not auto-attached to the

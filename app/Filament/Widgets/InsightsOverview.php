@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Widgets\Concerns\HasResponsiveStatsColumns;
 use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\Shop;
@@ -11,6 +12,8 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class InsightsOverview extends StatsOverviewWidget
 {
+    use HasResponsiveStatsColumns;
+
     // Shown only on the Insights page, not auto-attached to the Dashboard.
     protected static bool $isDiscovered = false;
 

@@ -24,6 +24,7 @@ class Product extends Model
         'product_name',
         'price',
         'last_confirmed',
+        'image_path',
     ];
 
     protected function casts(): array

@@ -8,6 +8,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Support\Enums\FontWeight;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -18,6 +19,15 @@ class ProductsTable
         return $table
             ->defaultSort('last_confirmed', 'desc')
             ->columns([
+                // No placeholder for products without a photo yet — an
+                // empty cell rather than a generic "no image" graphic.
+                ImageColumn::make('image_path')
+                    ->label('')
+                    ->disk('public')
+                    ->square()
+                    ->size(40)
+                    ->alignCenter()
+                    ->alt(fn ($record) => $record->product_name),
                 TextColumn::make('product_name')
                     ->searchable()
                     ->weight(FontWeight::Medium),

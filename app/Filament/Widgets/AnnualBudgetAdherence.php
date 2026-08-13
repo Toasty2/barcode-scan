@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Widgets\Concerns\HasResponsiveStatsColumns;
 use App\Models\BudgetChange;
 use App\Models\Trip;
 use App\Support\Money\Price;
@@ -12,6 +13,7 @@ use Illuminate\Support\Carbon;
 
 class AnnualBudgetAdherence extends StatsOverviewWidget
 {
+    use HasResponsiveStatsColumns;
     use InteractsWithPageFilters;
 
     // Shown only on the Annual Summary page, not auto-attached to the
