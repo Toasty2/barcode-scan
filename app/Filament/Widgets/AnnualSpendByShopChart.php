@@ -23,7 +23,8 @@ class AnnualSpendByShopChart extends ChartWidget
         // Biggest segment first, rather than whatever order shops happen to
         // have been created in.
         $breakdown = Trip::netSpendByShopForYear($year)
-            ->sortByDesc(fn (array $row) => $row['spend']->minorUnits);
+            ->sortByDesc(fn (array $row) => $row['spend']->minorUnits)
+            ->values();
 
         return [
             'datasets' => [

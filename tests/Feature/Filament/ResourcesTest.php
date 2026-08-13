@@ -52,6 +52,27 @@ class ResourcesTest extends TestCase
             ->assertCanSeeTableRecords([$product]);
     }
 
+    public function test_products_list_is_sorted_by_most_recently_confirmed_first(): void
+    {
+        $older = Product::create([
+            'upc' => '1111111111111',
+            'product_name' => 'Older',
+            'price' => 100,
+            'last_confirmed' => now()->subDays(10),
+        ]);
+        $newer = Product::create([
+            'upc' => '2222222222222',
+            'product_name' => 'Newer',
+            'price' => 100,
+            'last_confirmed' => now(),
+        ]);
+
+        $this->actingAs($this->user);
+
+        Livewire::test(ListProducts::class)
+            ->assertCanSeeTableRecords([$newer, $older], inOrder: true);
+    }
+
     public function test_a_product_can_be_created(): void
     {
         $this->actingAs($this->user);
@@ -81,6 +102,17 @@ class ResourcesTest extends TestCase
         Livewire::test(ListTrips::class)
             ->assertSuccessful()
             ->assertCanSeeTableRecords([$trip]);
+    }
+
+    public function test_trips_list_is_sorted_most_recent_first(): void
+    {
+        $older = Trip::create(['shopped_on' => today()->subDays(10), 'discount' => 0]);
+        $newer = Trip::create(['shopped_on' => today(), 'discount' => 0]);
+
+        $this->actingAs($this->user);
+
+        Livewire::test(ListTrips::class)
+            ->assertCanSeeTableRecords([$newer, $older], inOrder: true);
     }
 
     public function test_trip_edit_page_shows_its_purchases_via_relation_manager(): void
@@ -159,5 +191,31 @@ class ResourcesTest extends TestCase
         Livewire::test(ListPurchases::class)
             ->assertSuccessful()
             ->assertCanSeeTableRecords([$purchase]);
+    }
+
+    public function test_purchases_list_is_sorted_by_most_recent_trip_first(): void
+    {
+        $olderTrip = Trip::create(['shopped_on' => today()->subDays(10), 'discount' => 0]);
+        $olderPurchase = $olderTrip->purchases()->create([
+            'upc' => null,
+            'product_name' => 'Older item',
+            'entry_type' => 'scan',
+            'quantity' => 1,
+            'unit_price' => 100,
+        ]);
+
+        $newerTrip = Trip::create(['shopped_on' => today(), 'discount' => 0]);
+        $newerPurchase = $newerTrip->purchases()->create([
+            'upc' => null,
+            'product_name' => 'Newer item',
+            'entry_type' => 'scan',
+            'quantity' => 1,
+            'unit_price' => 100,
+        ]);
+
+        $this->actingAs($this->user);
+
+        Livewire::test(ListPurchases::class)
+            ->assertCanSeeTableRecords([$newerPurchase, $olderPurchase], inOrder: true);
     }
 }
