@@ -1,4 +1,4 @@
-import { GBP, toMinorUnits, toMajorUnitsString } from './currency.js';
+import { GBP, toMinorUnits, toMajorUnitsString, formatAmount } from './currency.js';
 
 const BARCODE_FORMATS = ['ean_13', 'ean_8', 'upc_a', 'upc_e'];
 const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').content;
@@ -19,8 +19,12 @@ const addItemBtn = document.getElementById('add-item-btn');
 const tripList = document.getElementById('trip-list');
 const tripCount = document.getElementById('trip-count');
 const tripShop = document.getElementById('trip-shop');
+const newShopForm = document.getElementById('new-shop-form');
+const newShopName = document.getElementById('new-shop-name');
+const newShopColour = document.getElementById('new-shop-colour');
 const tripDiscount = document.getElementById('trip-discount');
 const submitTripBtn = document.getElementById('submit-trip-btn');
+const tripTotal = document.getElementById('trip-total');
 const submitStatus = document.getElementById('submit-status');
 
 let detector = null;
@@ -232,6 +236,7 @@ function createTripRow({ upc, entryType, name, price, quantity }) {
     row.querySelector('.item-remove').addEventListener('click', () => {
         row.remove();
         updateTripCount();
+        updateTripTotal();
     });
 
     return row;
@@ -241,6 +246,23 @@ function updateTripCount() {
     const count = tripList.children.length;
     tripCount.textContent = count;
     submitTripBtn.disabled = count === 0;
+}
+
+function calculateTripTotalMinorUnits() {
+    const grossMinorUnits = [...tripList.children].reduce((sum, row) => {
+        const price = toMinorUnits(row.querySelector('.item-price').value, GBP) ?? 0;
+        const quantity = parseInt(row.querySelector('.item-quantity').value, 10) || 1;
+
+        return sum + price * quantity;
+    }, 0);
+
+    const discountMinorUnits = toMinorUnits(tripDiscount.value, GBP) ?? 0;
+
+    return grossMinorUnits - discountMinorUnits;
+}
+
+function updateTripTotal() {
+    tripTotal.textContent = `Total: ${formatAmount(calculateTripTotalMinorUnits(), GBP)}`;
 }
 
 function addItemToTrip() {
@@ -256,6 +278,7 @@ function addItemToTrip() {
 
     tripList.prepend(row);
     updateTripCount();
+    updateTripTotal();
 
     entryForm.classList.add('hidden');
     retryLookupBtn.classList.add('hidden');
@@ -278,7 +301,20 @@ async function submitTrip() {
     }
 
     const discount = toMinorUnits(tripDiscount.value, GBP) ?? 0;
-    const shopId = tripShop.value ? parseInt(tripShop.value, 10) : null;
+
+    let shopId = null;
+    let newShop = null;
+
+    if (tripShop.value === '__new__') {
+        const name = newShopName.value.trim();
+        if (!name) {
+            submitStatus.textContent = 'Give the new shop a name, or choose an existing one.';
+            return;
+        }
+        newShop = { name, colour: newShopColour.value || null };
+    } else if (tripShop.value) {
+        shopId = parseInt(tripShop.value, 10);
+    }
 
     submitTripBtn.disabled = true;
     submitStatus.textContent = 'Saving trip…';
@@ -290,7 +326,7 @@ async function submitTrip() {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': CSRF_TOKEN,
             },
-            body: JSON.stringify({ items, discount, shop_id: shopId }),
+            body: JSON.stringify({ items, discount, shop_id: shopId, new_shop: newShop }),
         });
 
         const data = await response.json();
@@ -299,9 +335,21 @@ async function submitTrip() {
             throw new Error(data.message ?? 'Save failed');
         }
 
+        if (data.shop) {
+            const option = document.createElement('option');
+            option.value = data.shop.id;
+            option.textContent = data.shop.name;
+            option.selected = true;
+            tripShop.appendChild(option);
+            newShopForm.classList.add('hidden');
+            newShopName.value = '';
+            newShopColour.value = '#6b7280';
+        }
+
         tripList.innerHTML = '';
         updateTripCount();
         tripDiscount.value = '';
+        updateTripTotal();
         submitStatus.textContent = 'Trip saved!';
     } catch (err) {
         submitStatus.textContent = `Save failed: ${err.message}`;
@@ -315,5 +363,11 @@ retryLookupBtn.addEventListener('click', () => {
 });
 addItemBtn.addEventListener('click', addItemToTrip);
 submitTripBtn.addEventListener('click', submitTrip);
+tripShop.addEventListener('change', () => {
+    newShopForm.classList.toggle('hidden', tripShop.value !== '__new__');
+});
+tripList.addEventListener('input', updateTripTotal);
+tripDiscount.addEventListener('input', updateTripTotal);
 
+updateTripTotal();
 init();

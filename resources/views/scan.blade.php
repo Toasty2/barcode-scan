@@ -57,11 +57,17 @@
     <div>
         <label for="trip-shop" class="block text-sm mb-1">{{ __('Shop') }}</label>
         <select id="trip-shop" class="w-full p-2 rounded bg-gray-800 border border-gray-700">
-            <option value="">{{ __('None') }}</option>
+            <option value="__new__">{{ __('Add new shop') }}</option>
+            <option value="" @selected(! $shops->contains(fn ($shop) => $shop->is_default))>{{ __('None') }}</option>
             @foreach ($shops as $shop)
                 <option value="{{ $shop->id }}" @selected($shop->is_default)>{{ $shop->name }}</option>
             @endforeach
         </select>
+
+        <div id="new-shop-form" class="mt-2 flex gap-2 hidden">
+            <input id="new-shop-name" type="text" placeholder="{{ __('Shop name') }}" class="flex-1 min-w-0 p-2 rounded bg-gray-800 border border-gray-700">
+            <input id="new-shop-colour" type="color" value="#6b7280" class="h-10 w-14 shrink-0 rounded bg-gray-800 border border-gray-700 p-1">
+        </div>
     </div>
 
     <div>
@@ -72,6 +78,8 @@
     <button id="submit-trip-btn" type="button" class="w-full py-3 rounded-lg bg-blue-700 disabled:bg-gray-600 font-medium" disabled>
         {{ __('Submit trip') }}
     </button>
+
+    <p id="trip-total" class="text-center text-lg font-semibold"></p>
 
     <p id="submit-status" class="text-center text-sm"></p>
 </main>

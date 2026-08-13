@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Shop;
 use App\Models\Trip;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,6 +16,9 @@ class TripController extends Controller
         $validated = $request->validate([
             'discount' => ['nullable', 'integer', 'min:0'],
             'shop_id' => ['nullable', 'integer', 'exists:shops,id'],
+            'new_shop' => ['nullable', 'array'],
+            'new_shop.name' => ['required_with:new_shop', 'string', 'max:255'],
+            'new_shop.colour' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'items' => ['required', 'array', 'min:1'],
             'items.*.upc' => ['nullable', 'string', 'max:32'],
             'items.*.product_name' => ['required', 'string', 'max:255'],
@@ -23,10 +27,22 @@ class TripController extends Controller
             'items.*.entry_type' => ['required', 'in:scan'],
         ]);
 
-        $trip = DB::transaction(function () use ($validated) {
+        [$trip, $newShop] = DB::transaction(function () use ($validated) {
+            $shopId = $validated['shop_id'] ?? null;
+            $newShop = null;
+
+            if ($shopId === null && ! empty($validated['new_shop']['name'] ?? null)) {
+                $newShop = Shop::create([
+                    'name' => $validated['new_shop']['name'],
+                    'colour' => $validated['new_shop']['colour'] ?? null,
+                    'is_default' => false,
+                ]);
+                $shopId = $newShop->id;
+            }
+
             $trip = Trip::create([
                 'shopped_on' => now()->toDateString(),
-                'shop_id' => $validated['shop_id'] ?? null,
+                'shop_id' => $shopId,
                 'discount' => $validated['discount'] ?? 0,
             ]);
 
@@ -51,9 +67,13 @@ class TripController extends Controller
                 ]);
             }
 
-            return $trip;
+            return [$trip, $newShop];
         });
 
-        return response()->json(['success' => true, 'trip_id' => $trip->id]);
+        return response()->json([
+            'success' => true,
+            'trip_id' => $trip->id,
+            'shop' => $newShop ? ['id' => $newShop->id, 'name' => $newShop->name] : null,
+        ]);
     }
 }
