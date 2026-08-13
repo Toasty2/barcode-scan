@@ -36,6 +36,19 @@ class ResourcesTest extends TestCase
         $this->get('/admin/products')->assertRedirect('/admin/login');
     }
 
+    public function test_an_authenticated_user_can_access_the_admin_panel(): void
+    {
+        // Deliberately a real HTTP request, not Livewire::test() — this is
+        // the only test in the suite that exercises the actual middleware
+        // stack (Filament\Http\Middleware\Authenticate), which is where
+        // User::canAccessPanel() is enforced. Livewire::test() instantiates
+        // components directly and never runs route middleware, so it can't
+        // catch a regression here.
+        $this->actingAs($this->user)
+            ->get('/admin')
+            ->assertSuccessful();
+    }
+
     public function test_products_list_shows_records(): void
     {
         $product = Product::create([
