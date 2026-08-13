@@ -15,6 +15,7 @@ class TripsTable
     {
         return $table
             ->modifyQueryUsing(fn ($query) => $query->withCount('purchases'))
+            ->defaultSort('shopped_on', 'desc')
             ->columns([
                 TextColumn::make('shopped_on')
                     ->label('Date')

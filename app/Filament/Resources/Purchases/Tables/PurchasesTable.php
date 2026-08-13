@@ -14,6 +14,7 @@ class PurchasesTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('trip.shopped_on', 'desc')
             ->columns([
                 TextColumn::make('trip.shopped_on')
                     ->label('Trip date')

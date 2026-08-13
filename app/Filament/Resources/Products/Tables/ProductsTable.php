@@ -15,6 +15,7 @@ class ProductsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->defaultSort('last_confirmed', 'desc')
             ->columns([
                 TextColumn::make('product_name')
                     ->searchable()
