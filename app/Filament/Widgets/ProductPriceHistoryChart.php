@@ -26,7 +26,7 @@ class ProductPriceHistoryChart extends ChartWidget
             return ['datasets' => [], 'labels' => []];
         }
 
-        $history = Purchase::priceHistoryForUpc($this->record->upc);
+        $history = Purchase::priceHistoryForProduct($this->record);
 
         return [
             'datasets' => [

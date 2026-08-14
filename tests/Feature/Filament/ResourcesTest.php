@@ -3,6 +3,7 @@
 namespace Tests\Feature\Filament;
 
 use App\Filament\Resources\Products\Pages\CreateProduct;
+use App\Filament\Resources\Products\Pages\EditProduct;
 use App\Filament\Resources\Products\Pages\ListProducts;
 use App\Filament\Resources\Shops\Pages\CreateShop;
 use App\Filament\Resources\Shops\Pages\ListShops;
@@ -106,6 +107,30 @@ class ResourcesTest extends TestCase
         ]);
     }
 
+    public function test_a_products_upc_can_be_corrected(): void
+    {
+        // The whole point of the surrogate-key fix — upc used to be the
+        // primary key, making it immutable once other rows referenced it.
+        $product = Product::create([
+            'upc' => '0000000000000',
+            'product_name' => 'Typo UPC',
+            'price' => 150,
+            'last_confirmed' => now(),
+        ]);
+
+        $this->actingAs($this->user);
+
+        Livewire::test(EditProduct::class, ['record' => $product->getRouteKey()])
+            ->fillForm(['upc' => '5000112637922'])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas('products', [
+            'id' => $product->id,
+            'upc' => '5000112637922',
+        ]);
+    }
+
     public function test_trips_list_shows_records(): void
     {
         $trip = Trip::create(['shopped_on' => today(), 'discount' => 250]);
@@ -130,7 +155,7 @@ class ResourcesTest extends TestCase
 
     public function test_trip_edit_page_shows_its_purchases_via_relation_manager(): void
     {
-        Product::create([
+        $product = Product::create([
             'upc' => '5010102115521',
             'product_name' => 'Robinsons',
             'price' => 300,
@@ -139,7 +164,7 @@ class ResourcesTest extends TestCase
 
         $trip = Trip::create(['shopped_on' => today(), 'discount' => 0]);
         $purchase = $trip->purchases()->create([
-            'upc' => '5010102115521',
+            'product_id' => $product->id,
             'product_name' => 'Robinsons',
             'entry_type' => 'scan',
             'quantity' => 1,
@@ -192,7 +217,6 @@ class ResourcesTest extends TestCase
     {
         $trip = Trip::create(['shopped_on' => today(), 'discount' => 0]);
         $purchase = $trip->purchases()->create([
-            'upc' => null,
             'product_name' => 'Test Item',
             'entry_type' => 'lump_sum',
             'quantity' => 1,
@@ -210,7 +234,6 @@ class ResourcesTest extends TestCase
     {
         $olderTrip = Trip::create(['shopped_on' => today()->subDays(10), 'discount' => 0]);
         $olderPurchase = $olderTrip->purchases()->create([
-            'upc' => null,
             'product_name' => 'Older item',
             'entry_type' => 'scan',
             'quantity' => 1,
@@ -219,7 +242,6 @@ class ResourcesTest extends TestCase
 
         $newerTrip = Trip::create(['shopped_on' => today(), 'discount' => 0]);
         $newerPurchase = $newerTrip->purchases()->create([
-            'upc' => null,
             'product_name' => 'Newer item',
             'entry_type' => 'scan',
             'quantity' => 1,

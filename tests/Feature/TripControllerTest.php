@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\Product;
+use App\Models\Purchase;
 use App\Models\Shop;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -78,6 +80,29 @@ class TripControllerTest extends TestCase
 
         $response->assertStatus(422);
         $this->assertDatabaseCount('shops', 0);
+    }
+
+    public function test_a_scanned_item_creates_a_product_and_links_the_purchase_to_it(): void
+    {
+        $response = $this->postJson('/trips', $this->validPayload([
+            'items' => [
+                [
+                    'upc' => '5000112637922',
+                    'product_name' => 'Coca Cola',
+                    'price' => 150,
+                    'quantity' => 1,
+                    'entry_type' => 'scan',
+                ],
+            ],
+        ]));
+
+        $response->assertOk();
+
+        $product = Product::where('upc', '5000112637922')->first();
+        $this->assertNotNull($product);
+
+        $purchase = Purchase::first();
+        $this->assertSame($product->id, $purchase->product_id);
     }
 
     public function test_existing_shop_id_takes_precedence_over_new_shop(): void

@@ -18,14 +18,14 @@ class InsightsTest extends TestCase
 
     private function createTrip(string $date, ?int $shopId, string $upc, int $quantity, int $unitPrice, int $discount = 0): Trip
     {
-        Product::firstOrCreate(
+        $product = Product::firstOrCreate(
             ['upc' => $upc],
             ['product_name' => 'Item '.$upc, 'price' => $unitPrice, 'last_confirmed' => now()],
         );
 
         $trip = Trip::create(['shopped_on' => $date, 'shop_id' => $shopId, 'discount' => $discount]);
         $trip->purchases()->create([
-            'upc' => $upc,
+            'product_id' => $product->id,
             'product_name' => 'Item '.$upc,
             'entry_type' => 'scan',
             'quantity' => $quantity,

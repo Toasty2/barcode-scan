@@ -11,7 +11,7 @@ class ProductLookupController extends Controller
 
     public function show(string $upc): JsonResponse
     {
-        $product = Product::find($upc);
+        $product = Product::where('upc', $upc)->first();
 
         if (! $product) {
             return response()->json(['found' => false]);

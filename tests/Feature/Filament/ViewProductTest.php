@@ -41,7 +41,7 @@ class ViewProductTest extends TestCase
 
         $product = $this->createProduct();
 
-        Livewire::test(ViewProduct::class, ['record' => $product->getKey()])->assertSuccessful();
+        Livewire::test(ViewProduct::class, ['record' => $product->getRouteKey()])->assertSuccessful();
     }
 
     public function test_photo_is_hidden_when_the_product_has_no_image(): void
@@ -49,7 +49,7 @@ class ViewProductTest extends TestCase
         $this->actingAs(User::factory()->create());
         $product = $this->createProduct();
 
-        Livewire::test(ViewProduct::class, ['record' => $product->getKey()])
+        Livewire::test(ViewProduct::class, ['record' => $product->getRouteKey()])
             ->assertDontSee('/storage/products');
     }
 
@@ -62,7 +62,7 @@ class ViewProductTest extends TestCase
         $product = $this->createProduct();
         $product->update(['image_path' => 'products/test.png']);
 
-        Livewire::test(ViewProduct::class, ['record' => $product->getKey()])
+        Livewire::test(ViewProduct::class, ['record' => $product->getRouteKey()])
             ->assertSee('/storage/products/test.png')
             ->assertSee('alt="Coca Cola"', escape: false);
     }
@@ -97,7 +97,7 @@ class ViewProductTest extends TestCase
 
         $olderTrip = Trip::create(['shopped_on' => '2026-01-01', 'discount' => 0]);
         $olderTrip->purchases()->create([
-            'upc' => $product->upc,
+            'product_id' => $product->id,
             'product_name' => $product->product_name,
             'entry_type' => 'scan',
             'quantity' => 1,
@@ -106,7 +106,7 @@ class ViewProductTest extends TestCase
 
         $newerTrip = Trip::create(['shopped_on' => '2026-02-01', 'discount' => 0]);
         $newerTrip->purchases()->create([
-            'upc' => $product->upc,
+            'product_id' => $product->id,
             'product_name' => $product->product_name,
             'entry_type' => 'scan',
             'quantity' => 1,
@@ -129,7 +129,7 @@ class ViewProductTest extends TestCase
 
         $firstTrip = Trip::create(['shopped_on' => '2026-01-01', 'discount' => 0]);
         $firstTrip->purchases()->create([
-            'upc' => $product->upc,
+            'product_id' => $product->id,
             'product_name' => $product->product_name,
             'entry_type' => 'scan',
             'quantity' => 2,
@@ -138,7 +138,7 @@ class ViewProductTest extends TestCase
 
         $secondTrip = Trip::create(['shopped_on' => '2026-02-01', 'discount' => 0]);
         $secondTrip->purchases()->create([
-            'upc' => $product->upc,
+            'product_id' => $product->id,
             'product_name' => $product->product_name,
             'entry_type' => 'scan',
             'quantity' => 3,
@@ -158,7 +158,7 @@ class ViewProductTest extends TestCase
         $this->actingAs(User::factory()->create());
         $product = $this->createProduct();
 
-        $component = Livewire::test(ViewProduct::class, ['record' => $product->getKey()]);
+        $component = Livewire::test(ViewProduct::class, ['record' => $product->getRouteKey()]);
 
         $this->assertSame('Coca Cola', $component->instance()->getTitle());
         $this->assertSame('5000112637922', $component->instance()->getSubheading());
@@ -181,7 +181,7 @@ class ViewProductTest extends TestCase
 
         $olderTrip = Trip::create(['shopped_on' => '2026-01-01', 'discount' => 0]);
         $olderTrip->purchases()->create([
-            'upc' => $product->upc,
+            'product_id' => $product->id,
             'product_name' => $product->product_name,
             'entry_type' => 'scan',
             'quantity' => 1,
@@ -190,7 +190,7 @@ class ViewProductTest extends TestCase
 
         $newerTrip = Trip::create(['shopped_on' => '2026-02-01', 'discount' => 0]);
         $newerTrip->purchases()->create([
-            'upc' => $product->upc,
+            'product_id' => $product->id,
             'product_name' => $product->product_name,
             'entry_type' => 'scan',
             'quantity' => 1,

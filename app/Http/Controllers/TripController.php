@@ -47,8 +47,10 @@ class TripController extends Controller
             ]);
 
             foreach ($validated['items'] as $item) {
+                $product = null;
+
                 if (! empty($item['upc'])) {
-                    Product::updateOrCreate(
+                    $product = Product::updateOrCreate(
                         ['upc' => $item['upc']],
                         [
                             'product_name' => $item['product_name'],
@@ -59,7 +61,7 @@ class TripController extends Controller
                 }
 
                 $trip->purchases()->create([
-                    'upc' => $item['upc'] ?? null,
+                    'product_id' => $product?->id,
                     'product_name' => $item['product_name'],
                     'entry_type' => $item['entry_type'],
                     'quantity' => $item['quantity'],

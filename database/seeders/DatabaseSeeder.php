@@ -27,6 +27,12 @@ class DatabaseSeeder extends Seeder
 
         $products = Product::factory()->count(8)->create();
 
+        // A couple of example succession chains ("this product replaced
+        // that one" — e.g. a shrunk successor pack), so the combined
+        // price-history behaviour has something real to demonstrate.
+        $products[0]->update(['replaces_product_id' => $products[1]->id]);
+        $products[2]->update(['replaces_product_id' => $products[3]->id]);
+
         $shops = [
             Shop::create(['name' => 'Tesco', 'colour' => '#00539F', 'is_default' => true]),
             Shop::create(['name' => 'Waitrose', 'colour' => '#00603A', 'is_default' => false]),
@@ -68,7 +74,7 @@ class DatabaseSeeder extends Seeder
                     $unitPrice = max(1, (int) round($trendPrice * (1 + $noise)));
 
                     $trip->purchases()->create([
-                        'upc' => $product->upc,
+                        'product_id' => $product->id,
                         'product_name' => $product->product_name,
                         'entry_type' => 'scan',
                         'quantity' => fake()->numberBetween(1, 3),

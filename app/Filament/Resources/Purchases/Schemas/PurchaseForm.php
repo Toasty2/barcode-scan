@@ -18,9 +18,11 @@ class PurchaseForm
                     ->getOptionLabelFromRecordUsing(fn ($record) => $record->shopped_on->format('d/m/Y')." (#{$record->id})")
                     ->searchable()
                     ->required(),
-                TextInput::make('upc')
-                    ->label(__('UPC'))
-                    ->maxLength(32),
+                Select::make('product_id')
+                    ->label(__('Product'))
+                    ->relationship('product', 'product_name')
+                    ->searchable()
+                    ->preload(),
                 TextInput::make('product_name')
                     ->required(),
                 Select::make('entry_type')

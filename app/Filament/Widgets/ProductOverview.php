@@ -35,7 +35,7 @@ class ProductOverview extends StatsOverviewWidget
 
     private function priceDeltaStat(): Stat
     {
-        $history = Purchase::priceHistoryForUpc($this->record->upc);
+        $history = Purchase::priceHistoryForProduct($this->record);
 
         if ($history->isEmpty()) {
             return Stat::make(__('Price delta'), __('No purchase history yet'));
@@ -60,7 +60,7 @@ class ProductOverview extends StatsOverviewWidget
 
     private function totalPurchasesStat(): Stat
     {
-        $totalQuantity = (int) Purchase::where('upc', $this->record->upc)->sum('quantity');
+        $totalQuantity = (int) Purchase::where('product_id', $this->record->id)->sum('quantity');
 
         return Stat::make(__('Total purchases'), (string) $totalQuantity);
     }

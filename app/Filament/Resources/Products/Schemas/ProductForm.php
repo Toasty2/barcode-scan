@@ -3,10 +3,13 @@
 namespace App\Filament\Resources\Products\Schemas;
 
 use App\Filament\Support\PriceInput;
+use App\Models\Product;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 
 class ProductForm
 {
@@ -16,9 +19,8 @@ class ProductForm
             ->components([
                 TextInput::make('upc')
                     ->label(__('UPC'))
-                    ->required()
                     ->maxLength(32)
-                    ->disabledOn('edit'),
+                    ->unique(ignoreRecord: true),
                 TextInput::make('product_name')
                     ->required(),
                 PriceInput::make('price')
@@ -29,8 +31,19 @@ class ProductForm
                     ->label(__('Photo'))
                     ->image()
                     ->disk('public')
-                    ->directory('products')
-                    ->helperText(__('Purely decorative — not used for lookup or cataloguing.')),
+                    ->directory('products'),
+                Select::make('replaces_product_id')
+                    ->label(__('Replaces'))
+                    ->relationship(
+                        name: 'replacesProduct',
+                        titleAttribute: 'product_name',
+                        modifyQueryUsing: fn (Builder $query, ?Product $record) => $record
+                            ? $query->whereKeyNot($record->getKey())
+                            : $query,
+                    )
+                    ->searchable()
+                    ->preload()
+                    ->helperText(__('If this is a newer variant of an existing product (e.g. a shrunk successor pack), link it here to keep its price history continuous.')),
             ]);
     }
 }

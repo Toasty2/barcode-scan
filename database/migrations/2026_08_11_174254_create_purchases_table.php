@@ -14,8 +14,7 @@ return new class extends Migration
         Schema::create('purchases', function (Blueprint $table) {
             $table->id();
             $table->foreignId('trip_id')->constrained()->cascadeOnDelete();
-            $table->string('upc', 32)->nullable();
-            $table->foreign('upc')->references('upc')->on('products')->nullOnDelete();
+            $table->foreignId('product_id')->nullable()->constrained()->nullOnDelete();
             $table->string('product_name');
             $table->enum('entry_type', ['scan', 'coupon', 'lump_sum'])->default('scan');
             $table->smallInteger('quantity')->unsigned()->default(1);

@@ -15,7 +15,7 @@ class Purchase extends Model
 
     protected $fillable = [
         'trip_id',
-        'upc',
+        'product_id',
         'product_name',
         'entry_type',
         'quantity',
@@ -37,21 +37,32 @@ class Purchase extends Model
 
     public function product(): BelongsTo
     {
-        return $this->belongsTo(Product::class, 'upc', 'upc');
+        return $this->belongsTo(Product::class);
     }
 
     /**
-     * Every price actually paid for this product, oldest first — built from
-     * purchases.unit_price snapshots (what was really paid on each trip),
-     * not the products cache, which only ever holds the current price.
+     * Every price actually paid for this product, oldest first — spanning
+     * its full succession chain (this product plus whatever it replaced,
+     * and whatever that replaced, and so on), not just this one barcode's
+     * own short history. Built from purchases.unit_price snapshots (what
+     * was really paid on each trip), not the products cache, which only
+     * ever holds the current price.
      *
      * @return Collection<int, array{date: Carbon, price: \App\Support\Money\Price}>
      */
-    public static function priceHistoryForUpc(string $upc): Collection
+    public static function priceHistoryForProduct(Product $product): Collection
     {
+        $productIds = [];
+        $current = $product;
+
+        while ($current !== null) {
+            $productIds[] = $current->id;
+            $current = $current->replacesProduct;
+        }
+
         return static::query()
             ->join('trips', 'trips.id', '=', 'purchases.trip_id')
-            ->where('purchases.upc', $upc)
+            ->whereIn('purchases.product_id', $productIds)
             ->orderBy('trips.shopped_on')
             ->get(['purchases.unit_price', 'trips.shopped_on'])
             ->values()

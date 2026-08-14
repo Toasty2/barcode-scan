@@ -73,19 +73,19 @@ class InsightsOverview extends StatsOverviewWidget
 
     private function mostBoughtProductStat(): Stat
     {
-        $topUpc = Purchase::whereNotNull('upc')
-            ->selectRaw('upc, SUM(quantity) as total_quantity')
-            ->groupBy('upc')
+        $topProductId = Purchase::whereNotNull('product_id')
+            ->selectRaw('product_id, SUM(quantity) as total_quantity')
+            ->groupBy('product_id')
             ->orderByDesc('total_quantity')
             ->limit(1)
-            ->value('upc');
+            ->value('product_id');
 
-        if ($topUpc === null) {
+        if ($topProductId === null) {
             return Stat::make(__('Most-bought product'), __('Not enough data yet'));
         }
 
-        $totalQuantity = (int) Purchase::where('upc', $topUpc)->sum('quantity');
-        $productName = Product::find($topUpc)?->product_name;
+        $totalQuantity = (int) Purchase::where('product_id', $topProductId)->sum('quantity');
+        $productName = Product::find($topProductId)?->product_name;
 
         return Stat::make(__('Most-bought product'), $productName)
             ->description(trans_choice('Bought :count time|Bought :count times', $totalQuantity, ['count' => $totalQuantity]));
