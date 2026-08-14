@@ -6,6 +6,7 @@ use App\Filament\Widgets\YearOverYearChart;
 use App\Models\Product;
 use App\Models\Trip;
 use App\Models\User;
+use Brick\Money\Money;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Livewire\Livewire;
@@ -25,14 +26,14 @@ class YearOverYearChartTest extends TestCase
 
     private function createTripWithSpend(string $date, int $minorUnits): void
     {
-        $product = Product::factory()->create(['price' => $minorUnits]);
+        $product = Product::factory()->create(['price' => Money::ofMinor($minorUnits, 'GBP')]);
         $trip = Trip::create(['shopped_on' => $date, 'discount' => 0]);
         $trip->purchases()->create([
             'upc' => $product->upc,
             'product_name' => $product->product_name,
             'entry_type' => 'scan',
             'quantity' => 1,
-            'unit_price' => $minorUnits,
+            'unit_price' => Money::ofMinor($minorUnits, 'GBP'),
         ]);
     }
 

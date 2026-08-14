@@ -5,7 +5,7 @@ namespace App\Filament\Widgets;
 use App\Filament\Widgets\Concerns\HasResponsiveStatsColumns;
 use App\Models\BudgetChange;
 use App\Models\Trip;
-use App\Support\Money\Price;
+use Brick\Money\Money;
 use Filament\Widgets\Concerns\InteractsWithPageFilters;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -34,23 +34,24 @@ class AnnualBudgetAdherence extends StatsOverviewWidget
             ];
         }
 
-        $remaining = $totalBudget->subtract($totalSpend);
+        $locale = config('money.default_locale');
+        $remaining = $totalBudget->minus($totalSpend);
 
         return [
-            Stat::make(__('Budget'), $totalBudget->format())
+            Stat::make(__('Budget'), $totalBudget->formatToLocale($locale))
                 ->description(trans_choice(
                     'Across :count month with a budget set|Across :count months with a budget set',
                     $monthsWithBudget,
                     ['count' => $monthsWithBudget],
                 )),
-            Stat::make(__('Spend'), $totalSpend->format())
+            Stat::make(__('Spend'), $totalSpend->formatToLocale($locale))
                 ->description(match (true) {
-                    $remaining->minorUnits === 0 => __('Exactly on budget'),
-                    ! $remaining->isNegative() => __(':amount under budget', ['amount' => $remaining->format()]),
-                    default => __(':amount over budget', ['amount' => $remaining->abs()->format()]),
+                    $remaining->isZero() => __('Exactly on budget'),
+                    ! $remaining->isNegative() => __(':amount under budget', ['amount' => $remaining->formatToLocale($locale)]),
+                    default => __(':amount over budget', ['amount' => $remaining->abs()->formatToLocale($locale)]),
                 })
                 ->color(match (true) {
-                    $remaining->minorUnits === 0 => 'gray',
+                    $remaining->isZero() => 'gray',
                     ! $remaining->isNegative() => 'success',
                     default => 'danger',
                 }),
@@ -62,14 +63,12 @@ class AnnualBudgetAdherence extends StatsOverviewWidget
      * actually had a budget in effect, so the comparison never pits a
      * partial-year budget against a full-year spend figure.
      *
-     * @return array{0: ?Price, 1: Price, 2: int}
+     * @return array{0: ?Money, 1: Money, 2: int}
      */
     private function totalsForBudgetedMonths(int $year): array
     {
-        $currencyClass = config('money.default_currency');
-
         $totalBudget = null;
-        $totalSpend = new Price(0, new $currencyClass());
+        $totalSpend = Money::zero(config('money.default_currency'));
         $monthsWithBudget = 0;
 
         foreach (range(1, 12) as $month) {
@@ -81,8 +80,8 @@ class AnnualBudgetAdherence extends StatsOverviewWidget
             }
 
             $monthsWithBudget++;
-            $totalBudget = $totalBudget ? $totalBudget->add($budget) : $budget;
-            $totalSpend = $totalSpend->add(Trip::netSpendForMonth($monthStart));
+            $totalBudget = $totalBudget ? $totalBudget->plus($budget) : $budget;
+            $totalSpend = $totalSpend->plus(Trip::netSpendForMonth($monthStart));
         }
 
         return [$totalBudget, $totalSpend, $monthsWithBudget];

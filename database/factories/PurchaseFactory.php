@@ -23,7 +23,7 @@ class PurchaseFactory extends Factory
 
         return [
             'trip_id' => Trip::factory(),
-            'upc' => $product->upc,
+            'product_id' => $product->id,
             'product_name' => $product->product_name,
             'entry_type' => 'scan',
             'quantity' => fake()->numberBetween(1, 3),

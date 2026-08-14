@@ -2,7 +2,8 @@
 
 namespace App\Models;
 
-use App\Casts\PriceCast;
+use Brick\Money\Money;
+use Elegantly\Money\MoneyCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,7 +27,7 @@ class Purchase extends Model
     {
         return [
             'quantity' => 'integer',
-            'unit_price' => PriceCast::class,
+            'unit_price' => MoneyCast::class,
         ];
     }
 
@@ -48,7 +49,7 @@ class Purchase extends Model
      * was really paid on each trip), not the products cache, which only
      * ever holds the current price.
      *
-     * @return Collection<int, array{date: Carbon, price: \App\Support\Money\Price}>
+     * @return Collection<int, array{date: Carbon, price: Money}>
      */
     public static function priceHistoryForProduct(Product $product): Collection
     {

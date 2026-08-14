@@ -32,7 +32,7 @@ class PurchasesTable
                     ->sortable(),
                 PriceColumn::make('line_total')
                     ->label(__('Line total'))
-                    ->state(fn ($record) => $record->unit_price->multiply($record->quantity)),
+                    ->state(fn ($record) => $record->unit_price->multipliedBy($record->quantity)),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

@@ -8,6 +8,7 @@ use App\Filament\Widgets\ProductPriceHistoryChart;
 use App\Models\Product;
 use App\Models\Trip;
 use App\Models\User;
+use Brick\Money\Money;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
@@ -23,7 +24,7 @@ class ViewProductTest extends TestCase
         return Product::create([
             'upc' => '5000112637922',
             'product_name' => 'Coca Cola',
-            'price' => 150,
+            'price' => Money::ofMinor(150, 'GBP'),
             'last_confirmed' => now(),
         ]);
     }
@@ -101,7 +102,7 @@ class ViewProductTest extends TestCase
             'product_name' => $product->product_name,
             'entry_type' => 'scan',
             'quantity' => 1,
-            'unit_price' => 130,
+            'unit_price' => Money::ofMinor(130, 'GBP'),
         ]);
 
         $newerTrip = Trip::create(['shopped_on' => '2026-02-01', 'discount' => 0]);
@@ -110,7 +111,7 @@ class ViewProductTest extends TestCase
             'product_name' => $product->product_name,
             'entry_type' => 'scan',
             'quantity' => 1,
-            'unit_price' => 150,
+            'unit_price' => Money::ofMinor(150, 'GBP'),
         ]);
 
         $widget = new ProductOverview();
@@ -133,7 +134,7 @@ class ViewProductTest extends TestCase
             'product_name' => $product->product_name,
             'entry_type' => 'scan',
             'quantity' => 2,
-            'unit_price' => 150,
+            'unit_price' => Money::ofMinor(150, 'GBP'),
         ]);
 
         $secondTrip = Trip::create(['shopped_on' => '2026-02-01', 'discount' => 0]);
@@ -142,7 +143,7 @@ class ViewProductTest extends TestCase
             'product_name' => $product->product_name,
             'entry_type' => 'scan',
             'quantity' => 3,
-            'unit_price' => 150,
+            'unit_price' => Money::ofMinor(150, 'GBP'),
         ]);
 
         $widget = new ProductOverview();
@@ -185,7 +186,7 @@ class ViewProductTest extends TestCase
             'product_name' => $product->product_name,
             'entry_type' => 'scan',
             'quantity' => 1,
-            'unit_price' => 130,
+            'unit_price' => Money::ofMinor(130, 'GBP'),
         ]);
 
         $newerTrip = Trip::create(['shopped_on' => '2026-02-01', 'discount' => 0]);
@@ -194,7 +195,7 @@ class ViewProductTest extends TestCase
             'product_name' => $product->product_name,
             'entry_type' => 'scan',
             'quantity' => 1,
-            'unit_price' => 150,
+            'unit_price' => Money::ofMinor(150, 'GBP'),
         ]);
 
         $widget = new ProductPriceHistoryChart();

@@ -7,6 +7,7 @@ use App\Filament\Widgets\BudgetAdherenceChart;
 use App\Models\BudgetChange;
 use App\Models\Trip;
 use App\Models\User;
+use Brick\Money\Money;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Livewire\Livewire;
@@ -44,7 +45,7 @@ class BudgetAdherenceTest extends TestCase
     {
         Carbon::setTestNow('2026-08-15');
 
-        BudgetChange::create(['amount' => 20000, 'effective_from' => '2026-07-01']);
+        BudgetChange::create(['amount' => Money::ofMinor(20000, 'GBP'), 'effective_from' => '2026-07-01']);
 
         $trip = Trip::create(['shopped_on' => '2026-07-10', 'discount' => 0]);
         $trip->purchases()->create([
@@ -52,7 +53,7 @@ class BudgetAdherenceTest extends TestCase
             'product_name' => 'Item',
             'entry_type' => 'lump_sum',
             'quantity' => 1,
-            'unit_price' => 5000,
+            'unit_price' => Money::ofMinor(5000, 'GBP'),
         ]);
 
         $widget = new BudgetAdherenceChart();

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\BudgetChange;
+use Brick\Money\Money;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Tests\TestCase;
@@ -20,7 +21,7 @@ class BudgetChangeTest extends TestCase
     {
         Carbon::setTestNow('2026-08-15');
 
-        BudgetChange::create(['amount' => 20000, 'effective_from' => '2026-06-01']);
+        BudgetChange::create(['amount' => Money::ofMinor(20000, 'GBP'), 'effective_from' => '2026-06-01']);
 
         $months = BudgetChange::monthsWithBudget();
 

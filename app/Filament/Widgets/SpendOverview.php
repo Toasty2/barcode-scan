@@ -17,20 +17,21 @@ class SpendOverview extends StatsOverviewWidget
 
     protected function getStats(): array
     {
+        $locale = config('money.default_locale');
         $now = Carbon::now();
 
         $thisMonthSpend = Trip::netSpendForMonth($now);
         $thisMonthBudget = BudgetChange::amountForMonth($now);
-        $remaining = $thisMonthBudget?->subtract($thisMonthSpend);
+        $remaining = $thisMonthBudget?->minus($thisMonthSpend);
 
         $thisYearSpend = Trip::netSpendForYear($now);
 
         return [
-            Stat::make(__('This month'), $thisMonthSpend->format())
+            Stat::make(__('This month'), $thisMonthSpend->formatToLocale($locale))
                 ->description(match (true) {
                     $remaining === null => __('No budget set for this month'),
-                    ! $remaining->isNegative() => __(':amount under budget', ['amount' => $remaining->format()]),
-                    default => __(':amount over budget', ['amount' => $remaining->abs()->format()]),
+                    ! $remaining->isNegative() => __(':amount under budget', ['amount' => $remaining->formatToLocale($locale)]),
+                    default => __(':amount over budget', ['amount' => $remaining->abs()->formatToLocale($locale)]),
                 })
                 ->color(match (true) {
                     $remaining === null => 'gray',
@@ -38,7 +39,7 @@ class SpendOverview extends StatsOverviewWidget
                     default => 'danger',
                 }),
 
-            Stat::make(__('This year'), $thisYearSpend->format()),
+            Stat::make(__('This year'), $thisYearSpend->formatToLocale($locale)),
         ];
     }
 }

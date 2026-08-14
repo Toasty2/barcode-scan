@@ -24,8 +24,10 @@ class ProductOverview extends StatsOverviewWidget
             return [];
         }
 
+        $locale = config('money.default_locale');
+
         return [
-            Stat::make(__('Price'), $this->record->price->format()),
+            Stat::make(__('Price'), $this->record->price->formatToLocale($locale)),
             Stat::make(__('Last confirmed price'), $this->record->last_confirmed->format('d/m/Y'))
                 ->color($this->record->last_confirmed->lt(now()->subDays(90)) ? 'warning' : 'success'),
             $this->totalPurchasesStat(),
@@ -35,6 +37,7 @@ class ProductOverview extends StatsOverviewWidget
 
     private function priceDeltaStat(): Stat
     {
+        $locale = config('money.default_locale');
         $history = Purchase::priceHistoryForProduct($this->record);
 
         if ($history->isEmpty()) {
@@ -42,17 +45,17 @@ class ProductOverview extends StatsOverviewWidget
         }
 
         $firstPurchase = $history->first();
-        $delta = $history->last()['price']->subtract($firstPurchase['price']);
+        $delta = $history->last()['price']->minus($firstPurchase['price']);
         $firstDate = $firstPurchase['date']->format('d/m/Y');
 
-        return Stat::make(__('Price delta'), $delta->format())
+        return Stat::make(__('Price delta'), $delta->formatToLocale($locale))
             ->description(match (true) {
-                $delta->minorUnits === 0 => __('Same as first purchase on :date', ['date' => $firstDate]),
+                $delta->isZero() => __('Same as first purchase on :date', ['date' => $firstDate]),
                 $delta->isNegative() => __('Cheaper than first purchase on :date', ['date' => $firstDate]),
                 default => __('More expensive than first purchase on :date', ['date' => $firstDate]),
             })
             ->color(match (true) {
-                $delta->minorUnits === 0 => 'gray',
+                $delta->isZero() => 'gray',
                 $delta->isNegative() => 'success',
                 default => 'danger',
             });

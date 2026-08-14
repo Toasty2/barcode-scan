@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\Shop;
 use App\Models\Trip;
 use App\Models\User;
+use Brick\Money\Money;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 
@@ -20,6 +21,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $currency = config('money.default_currency');
+
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
@@ -41,8 +44,8 @@ class DatabaseSeeder extends Seeder
 
         // Two budget changes, so the dashboard has to prove it resolves the
         // right one per month rather than always using a single value.
-        BudgetChange::create(['amount' => 20000, 'effective_from' => Carbon::now()->subMonths(2)->startOfMonth()]);
-        BudgetChange::create(['amount' => 25000, 'effective_from' => Carbon::now()->startOfMonth()]);
+        BudgetChange::create(['amount' => Money::ofMinor(20000, $currency), 'effective_from' => Carbon::now()->subMonths(2)->startOfMonth()]);
+        BudgetChange::create(['amount' => Money::ofMinor(25000, $currency), 'effective_from' => Carbon::now()->startOfMonth()]);
 
         // Each product drifts up from some lower price 3 years ago to
         // exactly its current cached price today (plus a little noise per
@@ -63,13 +66,13 @@ class DatabaseSeeder extends Seeder
                 $trip = Trip::create([
                     'shopped_on' => $shoppedOn,
                     'shop_id' => fake()->randomElement($shops)?->id,
-                    'discount' => fake()->boolean(25) ? fake()->numberBetween(50, 300) : 0,
+                    'discount' => Money::ofMinor(fake()->boolean(25) ? fake()->numberBetween(50, 300) : 0, $currency),
                 ]);
 
                 foreach ($products->random(fake()->numberBetween(4, 6)) as $product) {
                     $progressToNow = (35 - $monthsAgo) / 35;
                     $drift = $priceDriftFactors[$product->upc];
-                    $trendPrice = $product->price->minorUnits * (1 - $drift + ($drift * $progressToNow));
+                    $trendPrice = $product->price->getMinorAmount()->toInt() * (1 - $drift + ($drift * $progressToNow));
                     $noise = fake()->numberBetween(-3, 3) / 100;
                     $unitPrice = max(1, (int) round($trendPrice * (1 + $noise)));
 
@@ -78,7 +81,7 @@ class DatabaseSeeder extends Seeder
                         'product_name' => $product->product_name,
                         'entry_type' => 'scan',
                         'quantity' => fake()->numberBetween(1, 3),
-                        'unit_price' => $unitPrice,
+                        'unit_price' => Money::ofMinor($unitPrice, $currency),
                     ]);
                 }
             }

@@ -99,9 +99,9 @@ class InsightsOverview extends StatsOverviewWidget
             return Stat::make(__('Biggest trip'), __('Not enough data yet'));
         }
 
-        $biggest = $trips->sortByDesc(fn (Trip $trip) => $trip->netSpend()->minorUnits)->first();
+        $biggest = $trips->sortByDesc(fn (Trip $trip) => $trip->netSpend()->getMinorAmount()->toInt())->first();
 
-        return Stat::make(__('Biggest trip'), $biggest->netSpend()->format())
+        return Stat::make(__('Biggest trip'), $biggest->netSpend()->formatToLocale(config('money.default_locale')))
             ->description($biggest->shopped_on->format('d/m/Y'));
     }
 }

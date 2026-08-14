@@ -32,7 +32,7 @@ class ProductPriceHistoryChart extends ChartWidget
             'datasets' => [
                 [
                     'label' => __('Price'),
-                    'data' => $history->map(fn (array $row) => $row['price']->toMajorUnits())->all(),
+                    'data' => $history->map(fn (array $row) => $row['price']->getAmount()->toFloat())->all(),
                 ],
             ],
             'labels' => $history->map(fn (array $row) => $row['date']->format('d/m/Y'))->all(),

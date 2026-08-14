@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Shop;
 use App\Models\Trip;
+use Brick\Money\Money;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Tests\TestCase;
@@ -55,14 +56,14 @@ class TripTest extends TestCase
             'product_name' => 'A',
             'entry_type' => 'scan',
             'quantity' => 3,
-            'unit_price' => 100,
+            'unit_price' => Money::ofMinor(100, 'GBP'),
         ]);
         $trip->purchases()->create([
             'upc' => null,
             'product_name' => 'B',
             'entry_type' => 'scan',
             'quantity' => 2,
-            'unit_price' => 200,
+            'unit_price' => Money::ofMinor(200, 'GBP'),
         ]);
 
         $otherYearTrip = Trip::create(['shopped_on' => '2026-06-01', 'discount' => 0]);
@@ -71,7 +72,7 @@ class TripTest extends TestCase
             'product_name' => 'C',
             'entry_type' => 'scan',
             'quantity' => 10,
-            'unit_price' => 100,
+            'unit_price' => Money::ofMinor(100, 'GBP'),
         ]);
 
         $this->assertSame(5, Trip::itemCountForYear(2025));
@@ -83,13 +84,13 @@ class TripTest extends TestCase
         $tesco = Shop::create(['name' => 'Tesco', 'is_default' => false]);
         $waitrose = Shop::create(['name' => 'Waitrose', 'is_default' => false]);
 
-        $tescoTrip = Trip::create(['shopped_on' => '2025-01-01', 'shop_id' => $tesco->id, 'discount' => 100]);
+        $tescoTrip = Trip::create(['shopped_on' => '2025-01-01', 'shop_id' => $tesco->id, 'discount' => Money::ofMinor(100, 'GBP')]);
         $tescoTrip->purchases()->create([
             'upc' => null,
             'product_name' => 'A',
             'entry_type' => 'scan',
             'quantity' => 1,
-            'unit_price' => 1000,
+            'unit_price' => Money::ofMinor(1000, 'GBP'),
         ]);
 
         $waitroseTrip = Trip::create(['shopped_on' => '2025-02-01', 'shop_id' => $waitrose->id, 'discount' => 0]);
@@ -98,7 +99,7 @@ class TripTest extends TestCase
             'product_name' => 'B',
             'entry_type' => 'scan',
             'quantity' => 1,
-            'unit_price' => 500,
+            'unit_price' => Money::ofMinor(500, 'GBP'),
         ]);
 
         $noShopTrip = Trip::create(['shopped_on' => '2025-03-01', 'discount' => 0]);
@@ -107,7 +108,7 @@ class TripTest extends TestCase
             'product_name' => 'C',
             'entry_type' => 'scan',
             'quantity' => 1,
-            'unit_price' => 300,
+            'unit_price' => Money::ofMinor(300, 'GBP'),
         ]);
 
         $breakdown = Trip::netSpendByShopForYear(2025);
@@ -115,12 +116,12 @@ class TripTest extends TestCase
         $this->assertCount(3, $breakdown);
 
         $tescoRow = $breakdown->first(fn (array $row) => $row['shop']?->is($tesco));
-        $this->assertSame(900, $tescoRow['spend']->minorUnits);
+        $this->assertSame(900, $tescoRow['spend']->getMinorAmount()->toInt());
 
         $waitroseRow = $breakdown->first(fn (array $row) => $row['shop']?->is($waitrose));
-        $this->assertSame(500, $waitroseRow['spend']->minorUnits);
+        $this->assertSame(500, $waitroseRow['spend']->getMinorAmount()->toInt());
 
         $noShopRow = $breakdown->first(fn (array $row) => $row['shop'] === null);
-        $this->assertSame(300, $noShopRow['spend']->minorUnits);
+        $this->assertSame(300, $noShopRow['spend']->getMinorAmount()->toInt());
     }
 }

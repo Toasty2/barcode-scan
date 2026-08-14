@@ -39,7 +39,7 @@ class SpendChart extends ChartWidget
             'datasets' => [
                 [
                     'label' => __('Spend'),
-                    'data' => $months->map(fn (Carbon $month) => Trip::netSpendForMonth($month)->toMajorUnits())->all(),
+                    'data' => $months->map(fn (Carbon $month) => Trip::netSpendForMonth($month)->getAmount()->toFloat())->all(),
                 ],
             ],
             'labels' => $months->map(fn (Carbon $month) => $month->format('M Y'))->all(),

@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Product;
+use Brick\Money\Money;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -31,7 +32,7 @@ class ProductFactory extends Factory
                 'Mattessons Smoked Pork Sausage 260g',
                 'Rombouts Coffee',
             ]),
-            'price' => fake()->numberBetween(50, 600),
+            'price' => Money::ofMinor(fake()->numberBetween(50, 600), config('money.default_currency')),
             'last_confirmed' => fake()->dateTimeBetween('-3 months', 'now'),
         ];
     }

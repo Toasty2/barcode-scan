@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Shop;
 use App\Models\Trip;
+use Brick\Money\Money;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -28,6 +29,7 @@ class TripController extends Controller
         ]);
 
         [$trip, $newShop] = DB::transaction(function () use ($validated) {
+            $currency = config('money.default_currency');
             $shopId = $validated['shop_id'] ?? null;
             $newShop = null;
 
@@ -43,7 +45,7 @@ class TripController extends Controller
             $trip = Trip::create([
                 'shopped_on' => now()->toDateString(),
                 'shop_id' => $shopId,
-                'discount' => $validated['discount'] ?? 0,
+                'discount' => Money::ofMinor($validated['discount'] ?? 0, $currency),
             ]);
 
             foreach ($validated['items'] as $item) {
@@ -54,7 +56,7 @@ class TripController extends Controller
                         ['upc' => $item['upc']],
                         [
                             'product_name' => $item['product_name'],
-                            'price' => $item['price'],
+                            'price' => Money::ofMinor($item['price'], $currency),
                             'last_confirmed' => now(),
                         ]
                     );
@@ -65,7 +67,7 @@ class TripController extends Controller
                     'product_name' => $item['product_name'],
                     'entry_type' => $item['entry_type'],
                     'quantity' => $item['quantity'],
-                    'unit_price' => $item['price'],
+                    'unit_price' => Money::ofMinor($item['price'], $currency),
                 ]);
             }
 

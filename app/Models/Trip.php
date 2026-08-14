@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use App\Casts\PriceCast;
-use App\Support\Money\Price;
+use Brick\Money\Money;
 use Carbon\CarbonInterface;
+use Elegantly\Money\MoneyCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,7 +27,7 @@ class Trip extends Model
     {
         return [
             'shopped_on' => 'date',
-            'discount' => PriceCast::class,
+            'discount' => MoneyCast::class,
         ];
     }
 
@@ -47,15 +47,16 @@ class Trip extends Model
      * below, this operates on a single already-fetched trip rather than
      * running its own aggregate query.
      */
-    public function netSpend(): Price
+    public function netSpend(): Money
     {
         $grossMinorUnits = $this->purchases->sum(
-            fn (Purchase $purchase) => $purchase->quantity * $purchase->unit_price->minorUnits
+            fn (Purchase $purchase) => $purchase->quantity * $purchase->unit_price->getMinorAmount()->toInt()
         );
 
-        $currencyClass = config('money.default_currency');
-
-        return new Price($grossMinorUnits - $this->discount->minorUnits, new $currencyClass());
+        return Money::ofMinor(
+            $grossMinorUnits - $this->discount->getMinorAmount()->toInt(),
+            config('money.default_currency')
+        );
     }
 
     /**
@@ -63,7 +64,7 @@ class Trip extends Model
      * discount — the line-item total minus discounts, not just the raw sum.
      * Both sums happen as integer minor-unit arithmetic in SQL
      */
-    public static function netSpendForPeriod(CarbonInterface $start, CarbonInterface $end): Price
+    public static function netSpendForPeriod(CarbonInterface $start, CarbonInterface $end): Money
     {
         $grossMinorUnits = (int) static::whereBetween('shopped_on', [$start, $end])
             ->join('purchases', 'purchases.trip_id', '=', 'trips.id')
@@ -71,17 +72,15 @@ class Trip extends Model
 
         $totalDiscountMinorUnits = (int) static::whereBetween('shopped_on', [$start, $end])->sum('discount');
 
-        $currencyClass = config('money.default_currency');
-
-        return new Price($grossMinorUnits - $totalDiscountMinorUnits, new $currencyClass());
+        return Money::ofMinor($grossMinorUnits - $totalDiscountMinorUnits, config('money.default_currency'));
     }
 
-    public static function netSpendForMonth(CarbonInterface $month): Price
+    public static function netSpendForMonth(CarbonInterface $month): Money
     {
         return static::netSpendForPeriod($month->clone()->startOfMonth(), $month->clone()->endOfMonth());
     }
 
-    public static function netSpendForYear(CarbonInterface $year): Price
+    public static function netSpendForYear(CarbonInterface $year): Money
     {
         return static::netSpendForPeriod($year->clone()->startOfYear(), $year->clone()->endOfYear());
     }
@@ -122,25 +121,25 @@ class Trip extends Model
      * each trip's discount once per purchase row — the same reason
      * netSpendForPeriod() sums gross and discount as two separate queries.
      *
-     * @return Collection<int, array{shop: ?Shop, spend: Price}>
+     * @return Collection<int, array{shop: ?Shop, spend: Money}>
      */
     public static function netSpendByShopForYear(int $year): Collection
     {
-        $currencyClass = config('money.default_currency');
+        $currency = config('money.default_currency');
 
         return static::whereYear('shopped_on', $year)
             ->with(['shop', 'purchases'])
             ->get()
             ->groupBy('shop_id')
-            ->map(function (Collection $trips) use ($currencyClass) {
+            ->map(function (Collection $trips) use ($currency) {
                 $grossMinorUnits = $trips->sum(
-                    fn (self $trip) => $trip->purchases->sum(fn (Purchase $purchase) => $purchase->quantity * $purchase->unit_price->minorUnits)
+                    fn (self $trip) => $trip->purchases->sum(fn (Purchase $purchase) => $purchase->quantity * $purchase->unit_price->getMinorAmount()->toInt())
                 );
-                $discountMinorUnits = $trips->sum(fn (self $trip) => $trip->discount->minorUnits);
+                $discountMinorUnits = $trips->sum(fn (self $trip) => $trip->discount->getMinorAmount()->toInt());
 
                 return [
                     'shop' => $trips->first()->shop,
-                    'spend' => new Price($grossMinorUnits - $discountMinorUnits, new $currencyClass()),
+                    'spend' => Money::ofMinor($grossMinorUnits - $discountMinorUnits, $currency),
                 ];
             })
             ->values();

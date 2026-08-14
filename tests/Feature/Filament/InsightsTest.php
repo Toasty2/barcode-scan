@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Shop;
 use App\Models\Trip;
 use App\Models\User;
+use Brick\Money\Money;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -20,16 +21,16 @@ class InsightsTest extends TestCase
     {
         $product = Product::firstOrCreate(
             ['upc' => $upc],
-            ['product_name' => 'Item '.$upc, 'price' => $unitPrice, 'last_confirmed' => now()],
+            ['product_name' => 'Item '.$upc, 'price' => Money::ofMinor($unitPrice, 'GBP'), 'last_confirmed' => now()],
         );
 
-        $trip = Trip::create(['shopped_on' => $date, 'shop_id' => $shopId, 'discount' => $discount]);
+        $trip = Trip::create(['shopped_on' => $date, 'shop_id' => $shopId, 'discount' => Money::ofMinor($discount, 'GBP')]);
         $trip->purchases()->create([
             'product_id' => $product->id,
             'product_name' => 'Item '.$upc,
             'entry_type' => 'scan',
             'quantity' => $quantity,
-            'unit_price' => $unitPrice,
+            'unit_price' => Money::ofMinor($unitPrice, 'GBP'),
         ]);
 
         return $trip;
@@ -68,8 +69,8 @@ class InsightsTest extends TestCase
 
     public function test_most_bought_product_is_ranked_by_total_quantity(): void
     {
-        Product::create(['upc' => '111', 'product_name' => 'Beans', 'price' => 100, 'last_confirmed' => now()]);
-        Product::create(['upc' => '222', 'product_name' => 'Bread', 'price' => 150, 'last_confirmed' => now()]);
+        Product::create(['upc' => '111', 'product_name' => 'Beans', 'price' => Money::ofMinor(100, 'GBP'), 'last_confirmed' => now()]);
+        Product::create(['upc' => '222', 'product_name' => 'Bread', 'price' => Money::ofMinor(150, 'GBP'), 'last_confirmed' => now()]);
 
         $this->createTrip('2026-01-01', null, '111', 5, 100);
         $this->createTrip('2026-01-08', null, '222', 1, 150);

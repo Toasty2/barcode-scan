@@ -30,14 +30,14 @@ class BudgetAdherenceChart extends ChartWidget
             'datasets' => [
                 [
                     'label' => __('Budget'),
-                    'data' => $months->map(fn ($month) => BudgetChange::amountForMonth($month)?->toMajorUnits())->all(),
+                    'data' => $months->map(fn ($month) => BudgetChange::amountForMonth($month)?->getAmount()->toFloat())->all(),
                     'borderColor' => $budgetColour,
                     'backgroundColor' => $budgetColour,
                     'fill' => false,
                 ],
                 [
                     'label' => __('Spend'),
-                    'data' => $months->map(fn ($month) => Trip::netSpendForMonth($month)->toMajorUnits())->all(),
+                    'data' => $months->map(fn ($month) => Trip::netSpendForMonth($month)->getAmount()->toFloat())->all(),
                     'borderColor' => $spendColour,
                     'backgroundColor' => $spendColour,
                     'fill' => false,

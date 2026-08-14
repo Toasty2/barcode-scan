@@ -36,7 +36,7 @@ class AnnualSpendByMonthChart extends ChartWidget
                 return null;
             }
 
-            return Trip::netSpendForMonth($monthStart)->toMajorUnits();
+            return Trip::netSpendForMonth($monthStart)->getAmount()->toFloat();
         });
 
         return [

@@ -9,6 +9,7 @@ use App\Filament\Widgets\AnnualSpendByShopChart;
 use App\Models\BudgetChange;
 use App\Models\Shop;
 use App\Models\Trip;
+use Brick\Money\Money;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Livewire\Livewire;
@@ -34,7 +35,7 @@ class AnnualSummaryWidgetsTest extends TestCase
             'product_name' => 'Item',
             'entry_type' => 'scan',
             'quantity' => 1,
-            'unit_price' => $minorUnits,
+            'unit_price' => Money::ofMinor($minorUnits, 'GBP'),
         ]);
     }
 
@@ -68,7 +69,7 @@ class AnnualSummaryWidgetsTest extends TestCase
 
     public function test_budget_adherence_compares_spend_to_budget_for_budgeted_months(): void
     {
-        BudgetChange::create(['amount' => 10000, 'effective_from' => '2025-01-01']);
+        BudgetChange::create(['amount' => Money::ofMinor(10000, 'GBP'), 'effective_from' => '2025-01-01']);
         $this->createTripWithSpend('2025-01-15', 4000);
 
         Livewire::test(AnnualBudgetAdherence::class, ['pageFilters' => ['year' => 2025]])
@@ -113,7 +114,7 @@ class AnnualSummaryWidgetsTest extends TestCase
             'product_name' => 'Item',
             'entry_type' => 'scan',
             'quantity' => 1,
-            'unit_price' => 1000,
+            'unit_price' => Money::ofMinor(1000, 'GBP'),
         ]);
 
         $widget = new AnnualSpendByShopChart();
@@ -141,7 +142,7 @@ class AnnualSummaryWidgetsTest extends TestCase
             'product_name' => 'Item',
             'entry_type' => 'scan',
             'quantity' => 1,
-            'unit_price' => 500,
+            'unit_price' => Money::ofMinor(500, 'GBP'),
         ]);
 
         $biggerTrip = Trip::create(['shopped_on' => '2026-02-01', 'shop_id' => $waitrose->id, 'discount' => 0]);
@@ -150,7 +151,7 @@ class AnnualSummaryWidgetsTest extends TestCase
             'product_name' => 'Item',
             'entry_type' => 'scan',
             'quantity' => 1,
-            'unit_price' => 1500,
+            'unit_price' => Money::ofMinor(1500, 'GBP'),
         ]);
 
         $widget = new AnnualSpendByShopChart();

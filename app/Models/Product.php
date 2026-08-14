@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Casts\PriceCast;
+use Elegantly\Money\MoneyCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,7 +27,7 @@ class Product extends Model
     protected function casts(): array
     {
         return [
-            'price' => PriceCast::class,
+            'price' => MoneyCast::class,
             'last_confirmed' => 'datetime',
         ];
     }

@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Trip;
+use Brick\Money\Money;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -19,7 +20,7 @@ class TripFactory extends Factory
     {
         return [
             'shopped_on' => fake()->dateTimeBetween('-3 months', 'now'),
-            'discount' => fake()->boolean(20) ? fake()->numberBetween(50, 300) : 0,
+            'discount' => Money::ofMinor(fake()->boolean(20) ? fake()->numberBetween(50, 300) : 0, config('money.default_currency')),
         ];
     }
 }

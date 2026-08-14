@@ -3,15 +3,14 @@
 namespace Tests\Unit\Filament\Widgets;
 
 use App\Filament\Widgets\YearlyOverview;
-use App\Support\Money\Currencies\GBP;
-use App\Support\Money\Price;
+use Brick\Money\Money;
 use Tests\TestCase;
 
 class YearlyOverviewTest extends TestCase
 {
-    private function price(int $minorUnits): Price
+    private function price(int $minorUnits): Money
     {
-        return new Price($minorUnits, new GBP());
+        return Money::ofMinor($minorUnits, 'GBP');
     }
 
     public function test_comparison_description_reports_more_spend(): void

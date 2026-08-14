@@ -15,6 +15,7 @@ use App\Models\Product;
 use App\Models\Shop;
 use App\Models\Trip;
 use App\Models\User;
+use Brick\Money\Money;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -55,7 +56,7 @@ class ResourcesTest extends TestCase
         $product = Product::create([
             'upc' => '5010102115521',
             'product_name' => 'Robinsons Dbl Con Sum Fruits 1.75ltr',
-            'price' => 300,
+            'price' => Money::ofMinor(300, 'GBP'),
             'last_confirmed' => now(),
         ]);
 
@@ -71,13 +72,13 @@ class ResourcesTest extends TestCase
         $older = Product::create([
             'upc' => '1111111111111',
             'product_name' => 'Older',
-            'price' => 100,
+            'price' => Money::ofMinor(100, 'GBP'),
             'last_confirmed' => now()->subDays(10),
         ]);
         $newer = Product::create([
             'upc' => '2222222222222',
             'product_name' => 'Newer',
-            'price' => 100,
+            'price' => Money::ofMinor(100, 'GBP'),
             'last_confirmed' => now(),
         ]);
 
@@ -114,7 +115,7 @@ class ResourcesTest extends TestCase
         $product = Product::create([
             'upc' => '0000000000000',
             'product_name' => 'Typo UPC',
-            'price' => 150,
+            'price' => Money::ofMinor(150, 'GBP'),
             'last_confirmed' => now(),
         ]);
 
@@ -133,7 +134,7 @@ class ResourcesTest extends TestCase
 
     public function test_trips_list_shows_records(): void
     {
-        $trip = Trip::create(['shopped_on' => today(), 'discount' => 250]);
+        $trip = Trip::create(['shopped_on' => today(), 'discount' => Money::ofMinor(250, 'GBP')]);
 
         $this->actingAs($this->user);
 
@@ -158,7 +159,7 @@ class ResourcesTest extends TestCase
         $product = Product::create([
             'upc' => '5010102115521',
             'product_name' => 'Robinsons',
-            'price' => 300,
+            'price' => Money::ofMinor(300, 'GBP'),
             'last_confirmed' => now(),
         ]);
 
@@ -168,7 +169,7 @@ class ResourcesTest extends TestCase
             'product_name' => 'Robinsons',
             'entry_type' => 'scan',
             'quantity' => 1,
-            'unit_price' => 300,
+            'unit_price' => Money::ofMinor(300, 'GBP'),
         ]);
 
         $this->actingAs($this->user);
@@ -220,7 +221,7 @@ class ResourcesTest extends TestCase
             'product_name' => 'Test Item',
             'entry_type' => 'lump_sum',
             'quantity' => 1,
-            'unit_price' => 1000,
+            'unit_price' => Money::ofMinor(1000, 'GBP'),
         ]);
 
         $this->actingAs($this->user);
@@ -237,7 +238,7 @@ class ResourcesTest extends TestCase
             'product_name' => 'Older item',
             'entry_type' => 'scan',
             'quantity' => 1,
-            'unit_price' => 100,
+            'unit_price' => Money::ofMinor(100, 'GBP'),
         ]);
 
         $newerTrip = Trip::create(['shopped_on' => today(), 'discount' => 0]);
@@ -245,7 +246,7 @@ class ResourcesTest extends TestCase
             'product_name' => 'Newer item',
             'entry_type' => 'scan',
             'quantity' => 1,
-            'unit_price' => 100,
+            'unit_price' => Money::ofMinor(100, 'GBP'),
         ]);
 
         $this->actingAs($this->user);
